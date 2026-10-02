@@ -16,6 +16,12 @@ Actual Dots compatibility and live idle-session sending remain unverified.
 
 Only the following release work is required:
 
+The [overnight validation plan](overnight-supervision-plan.md) records the
+2026-10-03 interview: Codex app is the first real target, ordinary intervention
+targets five minutes, and safe same-conversation resumption is allowed after
+confirmed owner exit. The five requested products remain the eventual support
+goal; their independent capabilities are not promised before actual trials.
+
 1. Verify authorized same-session sends and host context after the caller ends, then
    actual Dots discovery/linking through a supported local or external OAuth route.
    Keep package/plugin/protocol versions aligned for release. Establish the host
@@ -33,8 +39,9 @@ app-host receipts are deliberately not accepted by the public tools.
 Until all three pass, overnight supervision remains unverified. Local MCP discovery,
 scripted host fixtures and webhook `2xx` are insufficient. More providers, automatic
 worker launches, merging, deployment and expanded scheduling features are outside
-this correction's scope. Existing experimental adapters are retained without new
-support claims.
+the current Codex acceptance work. After it passes, qualify Codex CLI, Claude Code,
+Claude app and OpenCode CLI against the same existing-session scenario. Existing
+experimental adapters remain without new support claims until those trials pass.
 
 Maintain both READMEs, [interfaces](interfaces.md), [deployment](deployment.md),
 connection and verification records alongside behavior changes. Search/promotion
