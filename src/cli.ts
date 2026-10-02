@@ -116,8 +116,13 @@ async function serve() {
   const close = async () => {
     if (closing) return;
     closing = true;
+    // Fence dispatch before draining HTTP requests; an in-flight request must
+    // not send while shutdown is waiting for its own response.
+    rt?.events.stop();
+    const observerClosed = rt?.observer.close();
     await app?.close();
     await gateway?.close();
+    await observerClosed;
     await rt?.close();
     await unlink(instanceFile).catch(() => {});
     await unlink(lockFile).catch(() => {});

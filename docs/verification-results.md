@@ -15,6 +15,11 @@ advancing its recorded deadline, avoiding a startup-timing-dependent assertion.
 The app-host suite now has eight tests, including pause during transport startup
 and service shutdown before native dispatch; the gateway suite has seven.
 
+The published bridge snapshot `a56ed569627dfc3b95759f2782afbbe1757c69b6` passed
+the dedicated Windows local CI: install, typecheck, **55/55 tests**, build, package
+allowlist and unchanged-source fingerprint. The package and receipt remain on
+the local runner. [CI run 37032763913](https://github.com/OtterHelm/kingdots/actions/runs/37032763913).
+
 | Check                               | Result and scope                                                                                                                         |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Real Windows local service          | Restarted at version 0.1.2 with genuine existing executor context                                                                        |

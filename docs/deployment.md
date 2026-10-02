@@ -28,6 +28,8 @@ using the same data directory. `serve` runs in the foreground. `status` reports
 the local URL, PID, separate `gatewayUrl`, app-host prerequisites and gateway
 configuration. `stop` requests service shutdown; it leaves original coding sessions
 running. This CLI does not install automatic service startup at Windows login.
+Shutdown fences new host dispatch before draining in-flight HTTP requests, then
+waits for any already-started host receipts before closing persistent records.
 
 ## App-host prerequisites
 
