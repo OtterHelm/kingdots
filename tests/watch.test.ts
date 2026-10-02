@@ -397,7 +397,7 @@ test("public API and MCP enroll existing sessions while rejecting legacy worker 
       payload: { id: 1, method: "tools/list" },
     });
     const names = listed.json().result.tools.map((t: any) => t.name);
-    assert.equal(names.length, 16);
+    assert.equal(names.length, 18);
     assert.ok(names.includes("watch_observe"));
     assert.ok(
       !names.some((n: string) =>

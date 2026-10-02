@@ -69,6 +69,27 @@ export function tools(
       run: async (input) => observer.observe(input),
     },
     {
+      name: "watch_host_read",
+      description:
+        "Read the enrolled existing local Codex app conversation through the installed official app tools. No AI session is started. A changed external user message yields automatic management.",
+      schema: z.object({ watchId, sessionId: z.string().min(1) }),
+      readOnly: false,
+      run: (input) => observer.readHost(input.watchId, input.sessionId),
+    },
+    {
+      name: "watch_instruction_send",
+      description:
+        "Send a prepared app-host instruction once after fresh idle-state checks. It preserves host permissions and returns accepted/not_sent/unknown. Unknown delivery is never resent. Host idle check is not atomic.",
+      schema: z.object({
+        watchId,
+        commandId,
+        epoch: z.number().int().nonnegative(),
+      }),
+      readOnly: false,
+      run: (input) =>
+        observer.sendHost(input.watchId, input.commandId, input.epoch),
+    },
+    {
       name: "watch_instruction_prepare",
       description:
         "Journal Dots's scoped follow-up to the same enrolled idle or question-waiting session. This does not send anything. Active, unknown, permission-waiting or stale sessions are fenced.",

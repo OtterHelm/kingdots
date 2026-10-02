@@ -8,17 +8,24 @@ import {
 } from "./domain.js";
 import type { Adapter } from "./adapters/types.js";
 import { Store } from "./store.js";
+import type { AppHostTransport, HostSnapshot } from "./app-host.js";
 
 export const watchSchema = z.object({
   goal: z.string().min(1),
   sessions: z
     .array(
-      z.object({
-        backend: z.enum(backendIds),
-        sessionId: z.string().min(1),
-        project: z.string().min(1),
-        source: z.enum(["adapter", "dots_host"]).default("dots_host"),
-      }),
+      z
+        .object({
+          backend: z.enum(backendIds),
+          sessionId: z.string().min(1),
+          project: z.string().min(1),
+          source: z
+            .enum(["adapter", "dots_host", "app_host"])
+            .default("dots_host"),
+        })
+        .refine((s) => s.source !== "app_host" || s.backend === "codex-app", {
+          message: "app_host supports local Codex app sessions only",
+        }),
     )
     .min(1),
   completionConditions: z.array(z.string().min(1)).min(1),
@@ -49,7 +56,7 @@ export const observationSchema = z.object({
 });
 export interface Observation extends z.infer<typeof observationSchema> {
   receivedAt: string;
-  provenance: "dots_host_reported" | "adapter_metadata";
+  provenance: "dots_host_reported" | "adapter_metadata" | "app_host_verified";
 }
 export const completionEvidenceSchema = z
   .array(
@@ -94,10 +101,12 @@ export const instructionSchema = commandSchema.extend({
 export class Observer {
   private timer: NodeJS.Timeout;
   private polling = new Set<string>();
+  private sending = new Set<Promise<Command>>();
   private closed = false;
   constructor(
     readonly store: Store,
     private adapters: Map<string, Adapter>,
+    readonly appHost?: AppHostTransport,
   ) {
     for (const watch of store.watches()) {
       if (!watch.automatic) continue;
@@ -188,8 +197,14 @@ export class Observer {
       );
     const target = this.target(watch, input.backend, input.sessionId);
     if (
-      (target.source === "dots_host") !==
-      (provenance === "dots_host_reported")
+      provenance !==
+      (
+        {
+          dots_host: "dots_host_reported",
+          adapter: "adapter_metadata",
+          app_host: "app_host_verified",
+        } as const
+      )[target.source]
     )
       throw new DomainError(
         "observation_source",
@@ -272,8 +287,28 @@ export class Observer {
       if (!watch.automatic) return watch;
       const epoch = watch.epoch;
       for (const target of watch.sessions.filter(
-        (s) => s.source === "adapter",
+        (s) => s.source === "adapter" || s.source === "app_host",
       )) {
+        if (target.source === "app_host") {
+          try {
+            await this.readHost(id, target.sessionId);
+          } catch (error) {
+            watch = this.store.getWatch(id);
+            if (watch.automatic && watch.epoch === epoch && !this.closed)
+              this.observe(
+                {
+                  watchId: id,
+                  ...target,
+                  observationId: randomUUID(),
+                  state: "unknown",
+                  summary: "App host unavailable: " + (error as Error).message,
+                  evidence: ["Host read failed; no instruction sent"],
+                },
+                "app_host_verified",
+              );
+          }
+          continue;
+        }
         let state: Observation["state"] = "unknown",
           summary = "";
         try {
@@ -358,7 +393,7 @@ export class Observer {
         "stale_observation",
         "Read the existing session again before a follow-up",
       );
-    if (o.provenance !== "dots_host_reported")
+    if (!["dots_host_reported", "app_host_verified"].includes(o.provenance))
       throw new DomainError(
         "control_unverified",
         "Metadata reads do not grant control of an external session",
@@ -416,7 +451,23 @@ export class Observer {
         sessionId: input.sessionId,
         observationId: input.observationId,
         delivery: "not_sent",
-        controlConnection: "dots_host_required",
+        controlConnection:
+          watch.sessions.find(
+            (s) =>
+              s.backend === input.backend && s.sessionId === input.sessionId,
+          )?.source === "app_host"
+            ? "app_host"
+            : "dots_host_required",
+        ...(watch.sessions.find(
+          (s) => s.backend === input.backend && s.sessionId === input.sessionId,
+        )?.source === "app_host"
+          ? {
+              hostSignature: this.store.get<{ snapshot: HostSnapshot }>(
+                "settings",
+                `host:${watch.id}:${input.sessionId}`,
+              )?.snapshot.signature,
+            }
+          : {}),
       },
       createdAt: now,
       updatedAt: now,
@@ -431,7 +482,12 @@ export class Observer {
     });
     return command;
   }
-  claim(watchId: string, commandId: string, epoch: number) {
+  claim(
+    watchId: string,
+    commandId: string,
+    epoch: number,
+    hostDispatch = false,
+  ) {
     const watch = this.store.getWatch(watchId);
     this.writable(watch, epoch);
     const command = this.command(watchId, commandId);
@@ -441,11 +497,21 @@ export class Observer {
         "This instruction is not available for a new send; inspect its existing receipt",
       );
     const result = command.result as any;
+    if (result.controlConnection === "app_host" && !hostDispatch)
+      throw new DomainError(
+        "host_dispatch_required",
+        "Use watch_instruction_send for an enrolled app-host target",
+      );
     this.actionable(
       watch,
       result.backend,
       result.sessionId,
-      result.observationId,
+      hostDispatch
+        ? watch.observations.find(
+            (o) =>
+              o.backend === result.backend && o.sessionId === result.sessionId,
+          )!.observationId
+        : result.observationId,
     );
     command.status = "dispatching";
     command.updatedAt = new Date().toISOString();
@@ -463,8 +529,17 @@ export class Observer {
     outcome: "accepted" | "not_sent" | "unknown",
     evidence: string[],
     nativeId?: string,
+    hostVerified = false,
   ) {
     const command = this.command(watchId, commandId);
+    if (
+      (command.result as any)?.controlConnection === "app_host" &&
+      !hostVerified
+    )
+      throw new DomainError(
+        "host_receipt_required",
+        "App-host delivery receipts must come from the local transport",
+      );
     if (command.status !== "dispatching" && command.status !== "unknown")
       throw new DomainError(
         "receipt_conflict",
@@ -485,7 +560,7 @@ export class Observer {
       ...(command.result as any),
       delivery: outcome,
       evidence,
-      provenance: "dots_host_reported",
+      provenance: hostVerified ? "app_host_verified" : "dots_host_reported",
     };
     command.nativeId = nativeId ?? null;
     command.updatedAt = new Date().toISOString();
@@ -494,6 +569,163 @@ export class Observer {
       if (outcome !== "unknown") this.store.release(command.id);
     });
     return command;
+  }
+  async readHost(watchId: string, sessionId: string) {
+    const before = this.store.getWatch(watchId);
+    this.writable(before, before.epoch);
+    const target = this.target(before, "codex-app", sessionId);
+    if (target.source !== "app_host" || !this.appHost)
+      throw new DomainError(
+        "app_host_unavailable",
+        "Select the app_host transport for this existing Codex session",
+      );
+    const snapshot = await this.appHost.read(sessionId, target.project);
+    return this.recordHost(watchId, snapshot, before.epoch);
+  }
+  private recordHost(watchId: string, snapshot: HostSnapshot, epoch: number) {
+    const sessionId = snapshot.sessionId;
+    const watch = this.store.getWatch(watchId);
+    this.writable(watch, epoch);
+    if (this.closed)
+      throw new DomainError("write_fenced", "Service is closing");
+    const key = `host:${watchId}:${sessionId}`;
+    const prior = this.store.get<{ epoch: number; snapshot: HostSnapshot }>(
+      "settings",
+      key,
+    );
+    const ownMessage =
+      snapshot.userMessage?.delegatedFrom === this.appHost?.callerThreadId &&
+      this.store
+        .commands(watchId)
+        .some(
+          (c) =>
+            c.prompt === snapshot.userMessage?.text &&
+            (c.result as any)?.sessionId === sessionId &&
+            ["dispatching", "unknown", "completed"].includes(c.status),
+        );
+    const intervention =
+      prior?.epoch === watch.epoch &&
+      prior.snapshot.userMessage?.id &&
+      snapshot.userMessage?.id !== prior.snapshot.userMessage.id &&
+      !ownMessage;
+    this.store.put("settings", key, { epoch: watch.epoch, snapshot });
+    this.observe(
+      {
+        watchId,
+        backend: "codex-app",
+        sessionId,
+        observationId: randomUUID(),
+        state: intervention ? "user_intervened" : snapshot.state,
+        summary: intervention
+          ? "New external user input: automatic management yielded"
+          : snapshot.summary,
+        evidence: [
+          `Official read_thread local target ${sessionId}; signature ${snapshot.signature}`,
+        ],
+      },
+      "app_host_verified",
+    );
+    return { watch: this.store.getWatch(watchId), snapshot };
+  }
+  async sendHost(watchId: string, commandId: string, epoch: number) {
+    const pending = this.dispatchHost(watchId, commandId, epoch);
+    this.sending.add(pending);
+    try {
+      return await pending;
+    } finally {
+      this.sending.delete(pending);
+    }
+  }
+  private async dispatchHost(
+    watchId: string,
+    commandId: string,
+    epoch: number,
+  ) {
+    const command = this.command(watchId, commandId);
+    if (
+      ["completed", "failed", "unknown", "dispatching"].includes(command.status)
+    )
+      return command;
+    const before = this.store.getWatch(watchId);
+    this.writable(before, epoch);
+    const info = command.result as any;
+    const target = this.target(before, info.backend, info.sessionId);
+    if (
+      target.source !== "app_host" ||
+      !this.appHost ||
+      info.controlConnection !== "app_host"
+    )
+      throw new DomainError(
+        "app_host_unavailable",
+        "This instruction requires an enrolled app-host connection",
+      );
+    await this.appHost.assertCanSend(target.project);
+    const snapshot = await this.appHost.read(target.sessionId, target.project);
+    this.writable(this.store.getWatch(watchId), epoch);
+    if (this.closed)
+      throw new DomainError("write_fenced", "Service is closing");
+    this.recordHost(watchId, snapshot, epoch);
+    if (!this.store.getWatch(watchId).automatic)
+      return this.command(watchId, commandId);
+    if (
+      snapshot.state !== "idle" ||
+      snapshot.signature !== info.hostSignature
+    ) {
+      command.status = "failed";
+      command.updatedAt = new Date().toISOString();
+      command.result = {
+        ...info,
+        delivery: "not_sent",
+        evidence: [
+          "Fresh host state changed or is not idle; no native send was made",
+        ],
+        provenance: "app_host_verified",
+      };
+      this.store.transaction(() => {
+        this.store.saveCommand(command);
+        this.store.release(command.id);
+      });
+      return command;
+    }
+    const claimed = this.claim(watchId, commandId, epoch, true);
+    // The host API has no atomic idle/CAS operation. Keep its existing checks and
+    // expose this limitation rather than claiming an external write lock.
+    try {
+      const result = await this.appHost.send(
+        target.sessionId,
+        claimed.prompt!,
+        () => {
+          const latest = this.store.getWatch(watchId);
+          return (
+            !this.closed &&
+            latest.automatic &&
+            latest.epoch === epoch &&
+            this.command(watchId, commandId).status === "dispatching"
+          );
+        },
+      );
+      return this.receipt(
+        watchId,
+        commandId,
+        result.accepted ? "accepted" : "not_sent",
+        [
+          result.accepted
+            ? "Installed official app transport returned a target-specific receipt"
+            : "Management stopped before native dispatch; no instruction sent",
+        ],
+        result.nativeId,
+        true,
+      );
+    } catch (error) {
+      return this.receipt(
+        watchId,
+        commandId,
+        "unknown",
+        ["Host result was not confirmed: " + (error as Error).message],
+        undefined,
+        true,
+      );
+    }
   }
   private command(watchId: string, commandId: string) {
     const command = this.store.command(commandId);
@@ -607,6 +839,9 @@ export class Observer {
   async close() {
     this.closed = true;
     clearInterval(this.timer);
-    while (this.polling.size) await new Promise((r) => setTimeout(r, 10));
+    while (this.polling.size || this.sending.size) {
+      await Promise.allSettled([...this.sending]);
+      if (this.polling.size) await new Promise((r) => setTimeout(r, 10));
+    }
   }
 }

@@ -1,11 +1,11 @@
 {
   "name": "kingdots",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Let Dots observe and supervise user-selected existing coding sessions without creating workers",
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "kingdots",
-    "shortDescription": "Manage local AI work and verification"
+    "shortDescription": "Let Dots supervise existing coding sessions"
   }
 }

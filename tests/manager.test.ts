@@ -365,10 +365,15 @@ test("duration limits stop running work", async () => {
     f.adapter.emitResults = false;
     const task = await f.manager.create({
       ...f.input,
-      limits: { durationMs: 1500 },
+      limits: { durationMs: 60_000 },
     });
+    const running = f.store.getTask(task.id);
+    assert.equal(running.state, "running");
+    running.createdAt = new Date(Date.now() - 60_001).toISOString();
+    f.store.saveTask(running);
     await waitFor(() => !f.store.getTask(task.id).automatic, 5000);
     assert.match(f.store.getTask(task.id).blockedReason!, /budget/);
+    assert.equal(f.adapter.interrupts, 1);
   } finally {
     await f.cleanup();
   }

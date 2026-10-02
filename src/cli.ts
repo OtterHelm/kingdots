@@ -10,6 +10,8 @@ import { Vault } from "./vault.js";
 import { buildServer } from "./server.js";
 import { delay } from "./process.js";
 import { installLocalPlugin } from "./install-plugin.js";
+import { buildGateway } from "./gateway.js";
+import { tools } from "./tools.js";
 
 const args = process.argv.slice(2);
 const dataIndex = args.indexOf("--data-dir");
@@ -23,6 +25,7 @@ interface Instance {
   url: string;
   id: string;
   createdAt: string;
+  gatewayUrl?: string;
 }
 async function instance(): Promise<Instance | null> {
   try {
@@ -108,11 +111,13 @@ async function serve() {
   }
   let rt: Awaited<ReturnType<typeof runtime>> | undefined;
   let app: ReturnType<typeof buildServer> | undefined;
+  let gateway: ReturnType<typeof buildGateway> | undefined;
   let closing = false;
   const close = async () => {
     if (closing) return;
     closing = true;
     await app?.close();
+    await gateway?.close();
     await rt?.close();
     await unlink(instanceFile).catch(() => {});
     await unlink(lockFile).catch(() => {});
@@ -129,11 +134,21 @@ async function serve() {
           void close();
         },
         observer: rt.observer,
+        gatewayAuth: rt.gatewayAuth,
       },
     );
     const url = await app.listen({
       host: "127.0.0.1",
       port: Number(process.env.KINGDOTS_PORT ?? 0),
+    });
+    gateway = buildGateway(
+      rt.gatewayAuth,
+      tools(rt.manager, rt.events, rt.observer),
+      rt.events,
+    );
+    const gatewayUrl = await gateway.listen({
+      host: "127.0.0.1",
+      port: Number(process.env.KINGDOTS_GATEWAY_PORT ?? 0),
     });
     await writeFile(
       instanceFile,
@@ -142,6 +157,7 @@ async function serve() {
         url,
         id: randomUUID(),
         createdAt: new Date().toISOString(),
+        gatewayUrl,
       } satisfies Instance),
       { mode: 0o600 },
     );
@@ -188,6 +204,21 @@ async function main() {
               2,
             ) + "\n"
           : "kingdots is offline.\n",
+      );
+      break;
+    }
+    case "gateway-configure": {
+      const originIndex = args.indexOf("--origin");
+      if (originIndex < 0 || !args[originIndex + 1])
+        throw new Error(
+          "Use gateway-configure --origin https://YOUR_GATEWAY_HOST",
+        );
+      process.stdout.write(
+        JSON.stringify(
+          await api("/api/gateway/configure", {
+            origin: args[originIndex + 1],
+          }),
+        ) + "\n",
       );
       break;
     }
@@ -283,7 +314,7 @@ async function main() {
       break;
     default:
       process.stdout.write(
-        "kingdots · kingdots start | stop | status | doctor | open | mcp | install-plugin | tunnel-guide\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT\n",
+        "kingdots · kingdots start | stop | status | doctor | open | mcp | install-plugin | gateway-configure --origin HTTPS_ORIGIN | tunnel-guide\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT; KINGDOTS_GATEWAY_PORT\n",
       );
   }
 }

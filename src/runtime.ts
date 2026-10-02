@@ -13,6 +13,8 @@ import { OpenCodeAdapter } from "./adapters/opencode.js";
 import { UnverifiedAppAdapter } from "./adapters/unverified.js";
 import type { Adapter } from "./adapters/types.js";
 import type { BackendId } from "./domain.js";
+import { LocalAppHost } from "./app-host.js";
+import { GatewayAuth } from "./gateway-auth.js";
 export function defaultDataDir() {
   if (process.env.KINGDOTS_HOME !== undefined)
     return resolve(process.env.KINGDOTS_HOME);
@@ -39,7 +41,38 @@ export async function runtime(dataDir = defaultDataDir()) {
       : "API billing is forbidden. Execution is disabled until a subscription or local model connection is independently verified; stored session reading remains available.",
   );
   const events = new Events(store, vault);
-  const observer = new Observer(store, adapters);
+  const appHost = new LocalAppHost();
+  const observer = new Observer(store, adapters, appHost);
+  const gatewayAuth = new GatewayAuth(store);
+  events.authorizeOwner = (owner) => {
+    if (owner === "dots") return true;
+    try {
+      const grant = gatewayAuth.grant(owner);
+      return !grant.revoked && grant.origin === gatewayAuth.origin;
+    } catch {
+      return false;
+    }
+  };
+  gatewayAuth.onRevoke = (grant) => {
+    for (const watchId of grant.watchIds) {
+      if (grant.scopes.includes("kingdots:manage")) observer.pause(watchId);
+    }
+    for (const sub of store.values<{
+      owner: string;
+      name: string;
+      taskId: string;
+      url: string;
+    }>("subscriptions"))
+      if (sub.owner === grant.id)
+        events.unsubscribe(
+          {
+            name: sub.name,
+            arguments: { taskId: sub.taskId },
+            delivery: { url: sub.url },
+          },
+          grant.id,
+        );
+  };
   return {
     dataDir,
     vault,
@@ -47,9 +80,12 @@ export async function runtime(dataDir = defaultDataDir()) {
     manager,
     events,
     observer,
+    appHost,
+    gatewayAuth,
     async close() {
       events.stop();
       await observer.close();
+      await appHost.close();
       await manager.close();
       store.close();
     },

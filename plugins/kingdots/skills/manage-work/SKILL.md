@@ -15,6 +15,9 @@ fallback to complete this workflow. Do not take over unrelated sessions.
    to identify/read the exact sessions. Call `watch_create` to enroll those sessions,
    usually with `source: dots_host`. Registration does not itself establish an
    official read/control connection or an unattended wake-up.
+   For the installed local Codex app bridge, enroll `backend: codex-app` and
+   `source: app_host`. Use `watch_host_read` to read that exact enrolled target.
+   The local relay uses real executor context; it is not a separate AI session.
 2. Verify Dots's actual host tools and supported event/scheduled check-in path.
    If unavailable, explain that this watch is registered but overnight supervision
    cannot run yet. Do not claim a normal Codex chat, local MCP discovery or webhook
@@ -41,6 +44,10 @@ fallback to complete this workflow. Do not take over unrelated sessions.
    or turn state first. Duplicate reservations and command IDs do not authorize
    duplicate messages. If host control is unavailable, leave the instruction
    unsent and report that limitation.
+   For `app_host`, use `watch_instruction_send` after preparing; the service
+   performs its own claim, fresh host checks and receipt. Do not manually claim
+   or supply an app-host receipt. The native idle check is not atomic. Native
+   permission prompts and active/unknown states must remain blocked.
 7. Observe subsequent work and inspect original-host test/artifact evidence.
    `watch_finish` requires fresh idle snapshots and a passing referenced record
    for every initial completion condition. Report what was observed, what Dots
@@ -62,3 +69,8 @@ Keep unattended acceptance unverified until actual Dots continues after its init
 response ends, handles a question/error in the same existing session, reviews fresh
 evidence and sends the final report without another user message. Existing product
 usage allowances apply; kingdots does not enable billing or purchase credits.
+
+For a remote gateway, use only watches selected in local OAuth consent. Do not
+create or change OAuth grants, gateway origins or external tunnels yourself.
+An account connection does not itself prove the caller is actual Dots; the real
+Dots acceptance must still be observed. The loopback dashboard is never exposed.

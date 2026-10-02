@@ -10,6 +10,7 @@ import { tools, callTool, toolDefinitions } from "./tools.js";
 import { DomainError } from "./domain.js";
 import { fingerprint } from "./workspace.js";
 import { Observer } from "./watch.js";
+import type { GatewayAuth } from "./gateway-auth.js";
 
 function equal(actual: string, expected: string) {
   const a = Buffer.from(actual),
@@ -24,6 +25,7 @@ export function buildServer(
     webDir?: string;
     onShutdown?: () => void;
     observer?: Observer;
+    gatewayAuth?: GatewayAuth;
   } = {},
 ) {
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
@@ -83,7 +85,7 @@ export function buildServer(
   });
   app.get("/healthz", async () => ({ status: "ok", service: "kingdots" }));
   app.get("/api/status", async () => ({
-    version: "0.1.1",
+    version: "0.1.2",
     connectionMode: "local-stdio",
     apiBilling: "forbidden",
     tunnelEnabled: false,
@@ -92,6 +94,8 @@ export function buildServer(
     mode: "existing_session_observer",
     supervisor: "dots",
     createsSessions: false,
+    appHost: observer.appHost?.info() ?? { available: false },
+    gateway: options.gatewayAuth?.info() ?? { configured: false },
     connection: manager.store.get("settings", "dots_connection") ?? {
       unattendedAcceptance: "unverified",
     },
@@ -111,6 +115,53 @@ export function buildServer(
     );
   });
   app.get("/api/watches", async () => manager.store.watches());
+  app.get("/api/gateway", async () => ({
+    info: options.gatewayAuth?.info(),
+    pending: options.gatewayAuth?.pending() ?? [],
+    grants: options.gatewayAuth?.grants() ?? [],
+  }));
+  app.post("/api/gateway/configure", async (req) => {
+    if (!options.gatewayAuth)
+      throw new DomainError(
+        "gateway_unavailable",
+        "Gateway is unavailable",
+        503,
+      );
+    return options.gatewayAuth.configure(
+      z.object({ origin: z.string() }).parse(req.body).origin,
+    );
+  });
+  app.post<{ Params: { id: string } }>(
+    "/api/gateway/approvals/:id",
+    async (req) => {
+      if (!options.gatewayAuth)
+        throw new DomainError(
+          "gateway_unavailable",
+          "Gateway is unavailable",
+          503,
+        );
+      const input = z
+        .object({
+          displayCode: z.string(),
+          watchIds: z.array(z.string()).min(1),
+          scopes: z.array(z.enum(["kingdots:read", "kingdots:manage"])).min(1),
+        })
+        .parse(req.body);
+      return options.gatewayAuth.approve(
+        req.params.id,
+        input.displayCode,
+        input.watchIds,
+        input.scopes,
+      );
+    },
+  );
+  app.post<{ Params: { id: string } }>(
+    "/api/gateway/grants/:id/revoke",
+    async (req) => {
+      options.gatewayAuth?.revokeGrant(req.params.id);
+      return { revoked: true };
+    },
+  );
   app.post("/api/watches", async (req) => observer.create(req.body));
   app.get<{ Params: { id: string } }>("/api/watches/:id", async (req) => ({
     watch: manager.store.getWatch(req.params.id),
@@ -208,7 +259,7 @@ export function buildServer(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.1" },
+            serverInfo: { name: "kingdots", version: "0.1.2" },
             instructions:
               "Dots supervises only user-selected existing sessions. No new workers or worktrees. Observe healthy work quietly, refresh original host state before a follow-up, and reconcile unknown delivery. Host permission and management resume are user-only controls. Completion evidence is host-reported; actual unattended Dots wake-up remains unverified.",
           };

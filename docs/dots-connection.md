@@ -1,8 +1,8 @@
 # Dots supervises existing sessions
 
-The local plugin supplies kingdots records and attention events. The actual Dots
-feature is the supervisor and must also have official host tools for reading and
-messaging the existing sessions selected by the user.
+The local plugin and experimental OAuth gateway supply kingdots records and
+attention events. Dots remains the supervisor. Host access can use the local
+`app_host` bridge or Dots's own verified tools on the `dots_host` path.
 
 ## Local setup
 
@@ -18,16 +18,62 @@ messaging the existing sessions selected by the user.
    A Codex computer connection or Work Sync alone does not grant Dots this access.
    Reload supported plugin connections and verify actual Dots tool calls. Do not
    assume a Codex-local plugin will be exposed to Dots automatically.
-3. Verify real host reads of the selected session IDs and the official follow-up
-   tool's ownership, busy-state, interruption and permission behavior.
+3. For `app_host`, start the service from a genuine existing Codex executor and
+   inspect `status.appHost`. Verify an actual `watch_host_read` of the selected
+   local session/project. `available` only reports prerequisites. A terminal-started
+   running service will not acquire app context from a later `start` command.
+   For `dots_host`, verify Dots's own official read/follow-up tools instead.
 4. Enroll those existing sessions with `watch_create`. Registration must not start
    a session, resume a second process or prepare a new worktree.
+
+See [deployment](deployment.md) for environment, ports and restart procedures.
+
+## Experimental external OAuth route
+
+The current source adds a separate gateway for an OAuth-capable ChatGPT connector.
+Actual registration, activation, connector compatibility and Dots tool exposure
+remain unverified. These steps describe the implemented contract; they do not
+imply every account exposes a compatible setup screen.
+
+1. Start the local service with genuine app context. Register the existing local
+   Codex session as `backend: codex-app`, `source: app_host` with its original goal,
+   conditions and allowed follow-ups. The gateway cannot create watches.
+2. Separately prepare a stable public HTTPS hostname forwarding only to
+   `status.gatewayUrl`. Keep the dashboard/local API private and its tokens local.
+3. Configure the origin on the PC:
+
+   ```powershell
+   node dist/cli.js gateway-configure --origin https://YOUR_GATEWAY_HOST
+   ```
+
+   This configures metadata; it does not deploy forwarding or register a connector.
+   Set `KINGDOTS_GATEWAY_PORT` before startup if forwarding needs a stable port.
+
+4. In an actually supported connector flow, use `https://YOUR_GATEWAY_HOST/mcp`.
+   The client must support discovery, exact callback/resource and S256 PKCE.
+   The browser shows a matching consent code.
+5. On the PC, run `open`, inspect the Dots/connection panel, match the code and
+   select eligible existing watches. Read permission is required; management is
+   optional and must be requested by the client. Complete the original browser
+   flow without exposing tokens or consent cookies.
+6. Verify actual Dots calls `watch_list`, `watch_get` and `watch_host_read` for the
+   selected watch. Verify unrelated watches and local APIs are inaccessible.
+   Same-session sending needs its own user-authorized real host test.
+
+Scopes are `kingdots:read` and optional `kingdots:manage`. The gateway exposes
+12 selected-watch tools out of 18 local tools. One active gateway management
+grant is allowed per watch; this does not lock local clients or the host.
+Revocation pauses that grant's managed watches and stops its subscriptions.
+Changing origin revokes old grants.
+
+No Platform API key is required. The disabled API-key Secure MCP Tunnel is a
+separate transport. See [interfaces](interfaces.md) for expiry, scopes and delivery.
 
 See [Dots computers and apps](https://learn.chatgpt.com/docs/dots/computers-and-apps)
 and [local plugin packaging](https://developers.openai.com/plugins/build/plugins).
 Local tool discovery in a normal Codex chat does not establish actual Dots access.
 
-## Observed connection limits
+## Historical connection observations: 2026-10-02
 
 The 2026-10-02 check of version 0.1.1 connected to the installed local MCP plugin,
 listed all 16 tools and queried watches without a provider model call. A separate,
@@ -53,17 +99,31 @@ has not passed this scenario.
 
 ## Wake-up and follow-up
 
+On 2026-10-03, the version 0.1.2 local service used the installed official app-tool
+relay to read the selected existing Windows Codex conversation and verify its
+running state. A follow-up preparation was correctly rejected while it was active.
+No live instruction was sent. This local proof does not substitute for an actual
+Dots call or for durable host context after the caller's response ends.
+The external OAuth route has not been deployed or connected to the user's account.
+
 Use supported MCP Events or an actually supported Dots check-in. For the existing
 event contract, subscribe to `task.attention_required`/`task.completed` using
 `arguments: {taskId: watch.id}`. Keep subscription scope limited to enrolled watches.
 The service retains signed verification, retry records and durable event cursors.
 See [MCP Events](https://developers.openai.com/plugins/build/mcp-events).
 
-On attention, Dots reads `watch_get`, refreshes the original host state and records
-`watch_observe`. A scoped answer or repair is prepared and claimed once, sent by
-Dots through a verified official host tool to the same session, then recorded with
-`watch_instruction_receipt`. The service supplies no such host transport itself.
-If that tool is unavailable, leave the instruction unsent and report the limitation.
+On attention, Dots reads `watch_get` and refreshes original host state:
+
+- For `app_host`, use `watch_host_read`, inspect returned conversation context,
+  prepare a scoped instruction and call `watch_instruction_send`. The bridge
+  rechecks an unchanged idle state, sends once and stores the transport receipt.
+- For `dots_host`, use Dots's own official read, `watch_observe`, prepare/claim,
+  actual same-session host send and `watch_instruction_receipt`.
+
+If host access is unavailable, leave the instruction unsent and report the limit.
+App-host permission/running/changed state blocks a prepared send. Lost host results
+remain unknown and reserved; the public app-host path has no manual receipt override.
+An idle preflight or kingdots reservation is not an atomic write lock on the host.
 
 Do not manufacture a separate API supervisor or use an arbitrary normal-chat loop
 as proof that actual Dots wakes automatically. Secure MCP Tunnel operation remains
@@ -87,6 +147,9 @@ No credentials, billing settings or account schedules are changed by this setup.
 Webhook `2xx`, instruction claims, host-reported receipts and `decision_ack` are
 records of separate steps. None proves the initial response ended, the actual dot
 woke, or a final report reached the user. This acceptance remains unverified.
+
+Current fixture passes are recorded separately in [verification results](verification-results.md).
+They do not complete actual Dots acceptance or supersede the historical probe.
 
 The PC, desktop app and local service must remain available. Failure to read a
 session must be reported as unknown/unavailable, not as healthy or completed work.

@@ -69,7 +69,8 @@ function App() {
     [selected, setSelected] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null),
     [status, setStatus] = useState<any>(null),
-    [caps, setCaps] = useState<any[]>([]);
+    [caps, setCaps] = useState<any[]>([]),
+    [gateway, setGateway] = useState<any>(null);
   const [tab, setTab] = useState("watches"),
     [modal, setModal] = useState(false),
     [busy, setBusy] = useState(false),
@@ -92,6 +93,7 @@ function App() {
       const [all, info] = await Promise.all([api("/watches"), api("/status")]);
       setWatches(all);
       setStatus(info);
+      if (tab === "connections") setGateway(await api("/gateway"));
       if (selected) setDetail(await api("/watches/" + selected));
       setError("");
     } catch (e) {
@@ -103,7 +105,7 @@ function App() {
     void refresh();
     const timer = setInterval(() => void refresh(), 3000);
     return () => clearInterval(timer);
-  }, [token, selected]);
+  }, [token, selected, tab]);
   useEffect(() => {
     if (token && tab === "connections")
       void api("/capabilities")
@@ -120,6 +122,26 @@ function App() {
       setError((e as Error).message);
     } finally {
       setBusy(false);
+    }
+  }
+  async function consent(
+    event: React.FormEvent<HTMLFormElement>,
+    pending: any,
+  ) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    try {
+      await api(`/gateway/approvals/${pending.id}`, {
+        displayCode: String(data.get("code")),
+        watchIds: data.getAll("watch"),
+        scopes: data.has("manage")
+          ? ["kingdots:read", "kingdots:manage"]
+          : ["kingdots:read"],
+      });
+      setGateway(await api("/gateway"));
+      await refresh();
+    } catch (error) {
+      setError((error as Error).message);
     }
   }
   async function enroll(event: React.FormEvent<HTMLFormElement>) {
@@ -354,7 +376,9 @@ function App() {
                             관찰 경로:{" "}
                             {s.source === "dots_host"
                               ? "Dots가 공식 호스트 도구로 수집"
-                              : "로컬 어댑터의 읽기 전용 메타데이터"}
+                              : s.source === "app_host"
+                                ? "설치된 공식 앱 도구로 로컬 중계"
+                                : "로컬 어댑터의 읽기 전용 메타데이터"}
                           </p>
                           <strong>
                             {o ? states[o.state] : "관찰 기록 없음"}
@@ -367,7 +391,9 @@ function App() {
                                 ·{" "}
                                 {o.provenance === "dots_host_reported"
                                   ? "Dots가 전달한 기록"
-                                  : "어댑터 메타데이터"}
+                                  : o.provenance === "app_host_verified"
+                                    ? "로컬 앱 도구의 실제 응답"
+                                    : "어댑터 메타데이터"}
                               </small>
                               <details>
                                 <summary>관찰 근거</summary>
@@ -439,6 +465,73 @@ function App() {
         )}
         {tab === "connections" && (
           <div className="connections">
+            <section className="connection">
+              <h2>기존 Codex 앱 연결</h2>
+              <p>
+                {status?.appHost?.available
+                  ? "실행기 연결 문맥 있음 · 실제 세션 조회로 확인 필요"
+                  : "연결 문맥 없음 · 기존 Codex 대화에서 kingdots를 시작하세요"}
+              </p>
+              <p>
+                원격 연결: {gateway?.info?.publicOrigin ?? "아직 설정하지 않음"}
+                . 실제 Dots 자동 재확인은 미검증이에요.
+              </p>
+              {(gateway?.pending ?? []).map((pending: any) => (
+                <form
+                  key={pending.id}
+                  onSubmit={(event) => void consent(event, pending)}
+                >
+                  <h3>연결 허용 요청 · {pending.clientName}</h3>
+                  <p>
+                    OAuth 창의 코드 {pending.displayCode}와 요청 범위를
+                    확인하세요.
+                  </p>
+                  <label>
+                    확인 코드
+                    <input name="code" required autoComplete="off" />
+                  </label>
+                  {watches
+                    .filter((w) =>
+                      w.sessions.every(
+                        (s) =>
+                          s.source === "app_host" && s.backend === "codex-app",
+                      ),
+                    )
+                    .map((w) => (
+                      <label key={w.id}>
+                        <input name="watch" type="checkbox" value={w.id} />
+                        {w.goal}
+                      </label>
+                    ))}
+                  {pending.scopes.includes("kingdots:manage") && (
+                    <label>
+                      <input name="manage" type="checkbox" />
+                      선택한 감시의 범위 안에서 지시 전달·중단·보고 허용
+                    </label>
+                  )}
+                  <button type="submit">선택한 감시에 연결 허용</button>
+                </form>
+              ))}
+              {(gateway?.grants ?? [])
+                .filter((g: any) => !g.revoked)
+                .map((g: any) => (
+                  <div key={g.id}>
+                    <p>
+                      연결 범위: {g.watchIds.length}개 감시 ·{" "}
+                      {g.scopes.join(", ")}
+                    </p>
+                    <button
+                      onClick={() =>
+                        void api(`/gateway/grants/${g.id}/revoke`, {})
+                          .then(() => refresh())
+                          .catch((e) => setError(e.message))
+                      }
+                    >
+                      연결 허용 해제
+                    </button>
+                  </div>
+                ))}
+            </section>
             <p>
               로컬 어댑터의 조회와 Dots의 공식 앱 세션 접근은 별도로 검증해야
               해요. 기존 세션에 대한 제어권을 추정하지 않아요.
@@ -532,7 +625,7 @@ function App() {
                   name="sessions"
                   rows={5}
                   placeholder={
-                    '[{"backend":"codex-app","sessionId":"기존 세션 ID","project":"C:\\\\projects\\\\example","source":"dots_host"}]'
+                    '[{"backend":"codex-app","sessionId":"기존 세션 ID","project":"C:\\\\projects\\\\example","source":"app_host"}]'
                   }
                   required
                 />

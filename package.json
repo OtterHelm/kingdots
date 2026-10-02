@@ -1,7 +1,22 @@
 {
   "name": "kingdots",
-  "version": "0.1.1",
-  "description": "Local observation and decision records for Dots supervising existing AI sessions",
+  "version": "0.1.2",
+  "description": "Local MCP bridge for Dots to observe existing Codex coding sessions, record scoped follow-ups, and track delivery and completion evidence. Development preview.",
+  "keywords": [
+    "ai-agents",
+    "coding-agents",
+    "codex",
+    "mcp",
+    "session-management",
+    "local-first",
+    "typescript",
+    "windows",
+    "oauth2"
+  ],
+  "homepage": "https://github.com/OtterHelm/kingdots#readme",
+  "bugs": {
+    "url": "https://github.com/OtterHelm/kingdots/issues"
+  },
   "license": "Apache-2.0",
   "type": "module",
   "bin": {

@@ -91,6 +91,7 @@ export async function webhookPost(
   });
 }
 export class Events {
+  authorizeOwner: (owner: string) => boolean = () => true;
   private timer: NodeJS.Timeout | null = null;
   private delivering = false;
   constructor(
@@ -277,7 +278,9 @@ export class Events {
         .values<Subscription>("subscriptions")
         .filter(
           (s) =>
-            s.active && (!s.expiresAt || Date.parse(s.expiresAt) > Date.now()),
+            s.active &&
+            this.authorizeOwner(s.owner) &&
+            (!s.expiresAt || Date.parse(s.expiresAt) > Date.now()),
         );
       for (const subscription of subscriptions) {
         // Durable event-to-outbox cursor; events and deliveries survive process restarts.
@@ -315,7 +318,8 @@ export class Events {
           if (!secret) continue;
           if (
             !this.store.get<Subscription>("subscriptions", subscription.id)
-              ?.active
+              ?.active ||
+            !this.authorizeOwner(subscription.owner)
           )
             break;
           const body = JSON.stringify({

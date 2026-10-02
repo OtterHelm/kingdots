@@ -1,10 +1,97 @@
 # Verification results
 
-Checked on **2026-10-02 (Asia/Seoul)**. Results describe the tested installation,
+Latest local check: **2026-10-03 (Asia/Seoul)**. Historical Dots checks below were
+performed on 2026-10-02. Results describe the tested installation or working tree,
 not universal support. Raw account, session and machine records stay in ignored
 local storage; public documentation contains no account IDs or callback secrets.
 
-## Current observer: 0.1.1
+## Latest bridge/service check: 0.1.2 (2026-10-03)
+
+The implementation check after the documentation snapshots below passed
+`npm run typecheck`, `npm run build` and **55/55 automated tests**. The earlier
+instruction round-trip failure was fixed by omitting an inapplicable undefined
+host signature. The duration regression now establishes running work before
+advancing its recorded deadline, avoiding a startup-timing-dependent assertion.
+The app-host suite now has eight tests, including pause during transport startup
+and service shutdown before native dispatch; the gateway suite has seven.
+
+| Check                               | Result and scope                                                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Real Windows local service          | Restarted at version 0.1.2 with genuine existing executor context                                                                        |
+| Installed official app bridge       | `codex-app-tools` 0.1.5 read the selected existing local Codex chat and its actual running state                                         |
+| Active-session protection           | Preparing a follow-up to that running chat was rejected; no native instruction was sent                                                  |
+| Existing authentication             | ChatGPT login/standard-provider preflight passed; this was not a model call or a per-session billing measurement                         |
+| Local plugin                        | 0.1.2 installed/enabled; official SDK discovered all 18 local MCP tools                                                                  |
+| Dashboard                           | Browser fixture passed registration, details, pause/resume, selected-watch OAuth consent, grant revocation, Dots panel and mobile layout |
+| Dependency advisories               | `npm audit --json`: zero known advisories for the installed lockfile                                                                     |
+| Actual Dots discovery/write/wake-up | **Still unverified**; no external gateway, new AI chat, API key or billing setup was created by this check                               |
+
+This establishes one actual local read through the relay. It does not establish
+safe live sending, durable app context after the caller ends, compatibility with
+every installed app version, hosted OAuth linking, or Dots supervision after its
+initial response. App-host idle preflight is not an atomic host reservation.
+The temporary browser OAuth grants used only a local fixture and fictitious watch.
+
+The user subsequently authorized a bounded temporary HTTPS/Dots test. Official
+Cloudflare `cloudflared` 2026.9.3 was downloaded and its published SHA-256 digest
+matched. The execution environment's tool policy rejected the tunnel launch
+(`blocked by policy`). No tunnel or account connector was created, and the bounded
+local watch was paused. This is an infrastructure execution restriction in this
+test environment, not evidence that hosted Dots linking is impossible. No live
+instruction or post-response Dots acceptance was performed.
+
+## Earlier documentation snapshot: 0.1.2
+
+Retested on **2026-10-03 (Asia/Seoul)** after source changes during documentation
+work. Package, lockfile and plugin manifests now declare `0.1.2`. This is local
+working-tree evidence, not a released-package or GitHub CI receipt.
+
+| Check                                         | Result                            | Scope                                                                                                            |
+| --------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck`                           | Passed                            | Service and dashboard                                                                                            |
+| `npm run build`                               | Passed                            | TypeScript and Vite output                                                                                       |
+| `npm test`                                    | **52 passed, 1 failed; 53 total** | Controlled fixtures, no provider model calls                                                                     |
+| App-host tests                                | 6 passed                          | Includes subscription-only authentication policy                                                                 |
+| OAuth gateway tests                           | 7 passed                          | Includes official SDK HTTP connection and revoked event-owner checks                                             |
+| Documentation validation                      | Passed                            | Relative links checked, both watch examples parsed against the current schema, all 18 local MCP tools documented |
+| Real Dots/host/external deployment acceptance | Not tested by this check          | Remains a separate gate                                                                                          |
+
+The remaining failure is the duplicate prepared-instruction comparison in
+`tests/watch.test.ts`: undefined `hostSignature` is absent after JSON persistence.
+The earlier 16-versus-18 tool assertion now passes. The full `prepack` release
+gate remains unpassed by this check. This documentation work does not modify the
+implementation or its tests; it records their observed current status.
+
+## Earlier working-tree check during this update
+
+Checked locally on **2026-10-03 (Asia/Seoul)** while updating documentation.
+At that initial check, package/plugin manifests declared `0.1.1` while new
+app-host/gateway protocol strings declared `0.1.2`. The later retest above records
+the updated manifest versions and test outcome.
+
+| Check                                          | Result                                 | Scope                                                                                   |
+| ---------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
+| `npm run typecheck`                            | Passed                                 | Service and dashboard types                                                             |
+| `npm run build`                                | Passed                                 | TypeScript output and Vite dashboard                                                    |
+| `npm test`                                     | **48 passed, 2 failed; 50 total**      | Controlled fixtures, no provider model calls                                            |
+| App-host fixture tests                         | 5 passed                               | Send-once, fresh-state fencing, unknown delivery, intervention and transport provenance |
+| OAuth gateway fixture tests                    | 5 passed                               | Local consent/cookies/PKCE, rotation/revocation, scopes and restricted listener         |
+| Real app-host read/send                        | Not tested in this documentation check | Fixtures do not establish installed-host compatibility                                  |
+| External proxy and actual Dots linking/wake-up | Not tested                             | No external deployment, account connection or unattended acceptance                     |
+| Package release gate                           | Not passed by this check               | The failing full suite prevents a clean `prepack` gate                                  |
+
+The failures were in `tests/watch.test.ts`:
+
+- A duplicate prepared-instruction comparison differs because an undefined
+  `hostSignature` property is omitted when the record is persisted as JSON.
+- The public tool-count assertion expects 16 while the registry now exposes 18.
+
+This documentation change records the observed failures; it does not modify the
+underlying work-in-progress implementation or turn the earlier successful CI
+receipt into evidence for the new bridge/gateway. Rerun and append fresh results
+after those sources change.
+
+## Verified observer installation: 0.1.1 (2026-10-02)
 
 Version 0.1.1 implements local records for Dots supervising user-selected existing
 sessions. The essential Dots connection gate has not passed. This workflow does

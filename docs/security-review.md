@@ -11,6 +11,52 @@ Reviewed on **2026-10-02**. This is a scoped source review, regression verificat
 dependency advisory check, and publication scan. It is not an independent penetration
 test or a guarantee that the preview has no vulnerabilities.
 
+## Current app-host and gateway boundaries
+
+Documentation updated on **2026-10-03** to describe current source. This addition
+does not extend the historical publication scan, dependency audit or security
+review below to the new working tree.
+
+- The installed app-tool bridge requires genuine executor context, checks the
+  selected local Codex session/project and rechecks idle state before sending.
+  Preflight and send are separate operations; no atomic host reservation exists.
+  Writes additionally require existing ChatGPT authentication and standard provider
+  configuration; API-key, custom-provider and unknown contexts are blocked.
+- The gateway uses a separate loopback listener and exposes scoped OAuth/MCP,
+  without the dashboard/local API. External HTTPS forwarding must target only
+  that listener, and needs its own deployment review.
+- S256 PKCE, exact supported callback/resource matching, a browser-bound consent
+  cookie, local code confirmation, expiring single-use codes and rotating refresh
+  tokens constrain authorization. Access/refresh token hashes are in SQLite.
+- The authenticated local UI selects existing app-host watches and read/manage
+  scopes. Revocation pauses watches managed by that grant and stops its events;
+  origin changes revoke prior grants. Local clients retain their own authority.
+- `allowedFollowUp` is a recorded scope for Dots to honor, not a semantic prompt
+  sandbox. Claimed direct-user authorization is not cryptographic proof.
+- Unconfirmed app-host sends remain unknown and reserved. Public manual receipts
+  cannot forge app-host provenance; a verified recovery path is still needed.
+
+The 2026-10-03 implementation review checked these scope/authentication boundaries
+against the source and controlled regressions. All 55 tests passed, including
+eight app-host and seven gateway tests. Pause/closure is checked immediately before
+native dispatch after asynchronous transport startup; shutdown waits for receipts.
+An already-dispatched request cannot be recalled by this local fence.
+The actual local host read and active-session rejection also passed.
+See [dated results](verification-results.md).
+
+`npm audit --json` again reported zero known advisories for the installed lockfile.
+No actual Dots link, unattended acceptance, deployed proxy review or independent
+penetration test was performed. The historical publication scan below remains
+limited to its stated snapshot.
+
+The current 0.1.2 publication scan checked 75 tracked/nonignored source files for
+credential signatures, private keys, personal Windows paths and known local
+identifiers; no matches were found. Local protocol probes, session snapshots,
+OAuth fixtures and downloaded helper binaries remain under ignored `.kingdots`.
+The package allowlist check passed for 90 members and excluded local records.
+
+## Historical review: 2026-10-02
+
 ## Publication and privacy checks
 
 - Scanned all three reachable commits through `5a5f323` (182 file versions) for
