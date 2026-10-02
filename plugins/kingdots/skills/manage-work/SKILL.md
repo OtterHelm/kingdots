@@ -1,6 +1,6 @@
 ---
 name: manage-work
-description: Execute and supervise user-selected local coding tasks through DotsKing. Use when the user explicitly asks to manage or continue work with DotsKing.
+description: Execute and supervise user-selected local coding tasks through kingdots. Use when the user explicitly asks to manage or continue work with kingdots.
 ---
 
 # Manage selected work

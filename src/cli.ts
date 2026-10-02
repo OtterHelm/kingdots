@@ -37,7 +37,7 @@ async function instance(): Promise<Instance | null> {
 }
 async function api(path: string, body?: unknown, mcp = false) {
   const current = await instance();
-  if (!current) throw new Error("DotsKing is offline. Run kingdots start.");
+  if (!current) throw new Error("kingdots is offline. Run kingdots start.");
   const vault = await Vault.open(join(dataDir, "secrets.bin"));
   const result = await fetch(current.url + path, {
     method: body === undefined ? "GET" : "POST",
@@ -97,7 +97,7 @@ async function serve() {
     const lock = JSON.parse(await readFile(lockFile, "utf8"));
     try {
       process.kill(lock.pid, 0);
-      throw new Error("Another DotsKing service is running");
+      throw new Error("Another kingdots service is running");
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
     }
@@ -164,7 +164,7 @@ async function main() {
     case "start": {
       const result = await startService();
       process.stdout.write(
-        `DotsKing running at ${result.url}\nRun kingdots open to authenticate the dashboard.\n`,
+        `kingdots running at ${result.url}\nRun kingdots open to authenticate the dashboard.\n`,
       );
       break;
     }
@@ -186,7 +186,7 @@ async function main() {
               null,
               2,
             ) + "\n"
-          : "DotsKing is offline.\n",
+          : "kingdots is offline.\n",
       );
       break;
     }
@@ -228,7 +228,7 @@ async function main() {
           stdio: "ignore",
           detached: true,
         }).unref();
-      process.stdout.write("Opened the local DotsKing dashboard.\n");
+      process.stdout.write("Opened the local kingdots dashboard.\n");
       break;
     }
     case "mcp": {
@@ -282,7 +282,7 @@ async function main() {
       break;
     default:
       process.stdout.write(
-        "DotsKing · kingdots start | stop | status | doctor | open | mcp | install-plugin | tunnel-guide\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT\n",
+        "kingdots · kingdots start | stop | status | doctor | open | mcp | install-plugin | tunnel-guide\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT\n",
       );
   }
 }

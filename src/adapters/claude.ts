@@ -251,7 +251,7 @@ export class ClaudeAdapter implements Adapter {
                       hookEventName: "PreToolUse" as const,
                       permissionDecision: "ask" as const,
                       permissionDecisionReason:
-                        "This action requires the user; existing allow rules do not expand DotsKing scope",
+                        "This action requires the user; existing allow rules do not expand kingdots scope",
                     },
                   };
                 },

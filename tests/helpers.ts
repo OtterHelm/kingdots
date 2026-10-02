@@ -114,7 +114,7 @@ export async function fixture() {
     "import {test} from 'node:test'; import assert from 'node:assert/strict'; import {add} from './math.mjs'; test('adds',()=>assert.equal(add(2,3),5));\n",
   );
   await git(project, ["init", "-b", "main"]);
-  await git(project, ["config", "user.name", "DotsKing Fixture"]);
+  await git(project, ["config", "user.name", "kingdots Fixture"]);
   await git(project, ["config", "user.email", "fixture@example.invalid"]);
   await git(project, ["add", "."]);
   await git(project, ["commit", "-m", "Fixture"]);

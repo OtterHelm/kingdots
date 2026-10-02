@@ -26,5 +26,5 @@ jobs:
       - name: Local verification and package
         shell: pwsh
         run: |
-          $artifacts = Join-Path $env:LOCALAPPDATA 'DotsKingCI\artifacts'
+          $artifacts = Join-Path $env:LOCALAPPDATA 'kingdots-ci\artifacts'
           .\scripts\ci.ps1 -ArtifactDirectory $artifacts

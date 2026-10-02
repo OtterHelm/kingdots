@@ -191,7 +191,7 @@ export class Manager {
         feature === "read_existing" || feature === "resume"
           ? "limited"
           : "supported",
-      notes: "Only DotsKing-owned sessions on this host",
+      notes: "Only kingdots-owned sessions on this host",
       version: this.store.get("settings", "version:" + backend),
       testedAt: new Date().toISOString(),
       evidence,

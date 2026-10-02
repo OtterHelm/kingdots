@@ -36,7 +36,7 @@ This is a user-operated account setup step. Review credentials, tunnel
 associations, developer-mode access, and plugin permissions before proceeding.
 Do not paste secrets into an AI conversation or repository files.
 
-1. Install/build DotsKing and make its CLI available to the tunnel process.
+1. Install/build kingdots and make its CLI available to the tunnel process.
    Start the service and run `kingdots doctor`.
 2. Follow the [official Secure MCP Tunnel guide](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
    Create a tunnel associated with the intended Platform organization and
@@ -46,7 +46,7 @@ Do not paste secrets into an AI conversation or repository files.
    `kingdots mcp`. Alternatively use the absolute Node and compiled CLI paths.
    Pass the same `KINGDOTS_HOME` as the service. The stdio bridge authenticates
    locally without putting the dashboard token into the tunnel profile.
-4. Run the official client's `doctor`, then `run`. DotsKing implements legacy
+4. Run the official client's `doctor`, then `run`. kingdots implements legacy
    MCP initialization for local clients and the `2026-07-28` discovery/event
    methods for the documented MCP Events integration. The installed tunnel
    and Dots versions must be tested for compatibility.
@@ -62,7 +62,7 @@ Do not paste secrets into an AI conversation or repository files.
 
 The [official MCP Events guide](https://developers.openai.com/plugins/build/mcp-events)
 defines callback verification, Standard Webhooks signatures, and payloads.
-DotsKing retries transient webhook failures up to five attempts, preserving
+kingdots retries transient webhook failures up to five attempts, preserving
 the event ID. It stops retrying rejected or expired endpoints and never follows
 redirects. Callback DNS addresses are checked and pinned on every connection.
 
@@ -85,7 +85,7 @@ until the real scenario is independently observed and documented.
 
 If event connectivity is unavailable, test a supported Dots scheduled check-in
 with this same acceptance scenario. Reuse the existing task context and stop
-the follow-up after completion/release. DotsKing does not create account
+the follow-up after completion/release. kingdots does not create account
 schedules or a replacement model loop itself.
 
 The computer, desktop app, service, and tunnel must remain online for local

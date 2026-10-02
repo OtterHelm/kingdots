@@ -12,7 +12,7 @@ kingdots는 사용자의 기존 HUNTBAND 로컬 CI 운영 방식에 맞춰 **자
 | runner            | `kingdots-local-win-x64`                                           |
 | labels            | `self-hosted`, `Windows`, `X64`, `kingdots`                        |
 | runner 폴더       | `C:\actions-runner-kingdots`                                       |
-| Windows 예약 작업 | `DotsKing Self-Hosted Runner`                                      |
+| Windows 예약 작업 | `kingdots Self-Hosted Runner`                                      |
 | 실행 계정         | 현재 Windows 사용자, 관리자 권한 상승·저장된 로그인 암호 없이 실행 |
 | 시작 방식         | 사용자 로그인 시 시작. 예약 작업으로 현재 실행도 시작 가능         |
 | GitHub check      | `Checks` / `windows`, 한 job                                       |
@@ -38,12 +38,12 @@ kingdots는 사용자의 기존 HUNTBAND 로컬 CI 운영 방식에 맞춰 **자
 
 검사 실패는 job 실패로 남깁니다. 검사를 이미 수행한 뒤 `prepack`을 다시 호출하지 않습니다. AI 제공자 인증과 개인 Codex 설정은 검사 환경에서 분리합니다. 실제 작업 AI를 호출하는 `test:live`는 이 파이프라인에 포함하지 않습니다.
 
-현재 CD 범위는 **검증한 패키지를 로컬에 보관하는 것**입니다. 실행 중인 DotsKing 서비스 교체, npm publish, GitHub Release 발행, 외부 배포는 자동 수행하지 않습니다.
+현재 CD 범위는 **검증한 패키지를 로컬에 보관하는 것**입니다. 실행 중인 kingdots 서비스 교체, npm publish, GitHub Release 발행, 외부 배포는 자동 수행하지 않습니다.
 
 GitHub job의 기본 보관 위치:
 
 ```text
-%LOCALAPPDATA%\DotsKingCI\artifacts\<commit>\<runId>-<attempt>\
+%LOCALAPPDATA%\kingdots-ci\artifacts\<commit>\<runId>-<attempt>\
   receipt.json
   install.log
   typecheck.log
@@ -82,9 +82,9 @@ workflow 토큰은 `contents: read`만 사용하고 checkout 이후 Git 인증�
 ## 상태 확인과 중단
 
 ```powershell
-Get-ScheduledTask -TaskName 'DotsKing Self-Hosted Runner'
-Start-ScheduledTask -TaskName 'DotsKing Self-Hosted Runner'
-Stop-ScheduledTask -TaskName 'DotsKing Self-Hosted Runner'
+Get-ScheduledTask -TaskName 'kingdots Self-Hosted Runner'
+Start-ScheduledTask -TaskName 'kingdots Self-Hosted Runner'
+Stop-ScheduledTask -TaskName 'kingdots Self-Hosted Runner'
 gh api repos/OtterHelm/kingdots/actions/runners --jq '.runners[] | {name, status, busy}'
 gh run list --repo OtterHelm/kingdots --workflow checks.yml
 ```

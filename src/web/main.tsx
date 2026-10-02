@@ -190,7 +190,7 @@ function App() {
     return (
       <main className="login">
         <div className="logo large">◌</div>
-        <h1>DotsKing</h1>
+        <h1>kingdots</h1>
         <p>여러 AI의 작업을 한곳에서 관리하세요.</p>
         <form
           onSubmit={(e) => {
@@ -229,7 +229,7 @@ function App() {
         <div className="brand">
           <span className="logo">◌</span>
           <div>
-            <strong>DotsKing</strong>
+            <strong>kingdots</strong>
             <small>LOCAL EXECUTION</small>
           </div>
         </div>
@@ -269,7 +269,7 @@ function App() {
                   ? "연결과 지원"
                   : "Dots 연결"}
             </h1>
-            <p>지시는 Dots가, 실행과 근거는 DotsKing이 관리해요.</p>
+            <p>지시는 Dots가, 실행과 근거는 kingdots가 관리해요.</p>
           </div>
           <button className="primary" onClick={() => setModal(true)}>
             ＋ 작업 맡기기

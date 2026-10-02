@@ -19,7 +19,7 @@ await writeFile(
   "import {test} from 'node:test';import assert from 'node:assert/strict';import {add} from './math.mjs';test('adds',()=>assert.equal(add(2,3),5));\n",
 );
 await git(project, ["init", "-b", "main"]);
-await git(project, ["config", "user.name", "DotsKing Live Fixture"]);
+await git(project, ["config", "user.name", "kingdots Live Fixture"]);
 await git(project, ["config", "user.email", "fixture@example.invalid"]);
 await git(project, ["add", "."]);
 await git(project, ["commit", "-m", "Controlled fixture"]);
@@ -42,7 +42,7 @@ const input = {
   authorization: {
     source: "direct_user_request",
     request:
-      "User authorized implementing and testing DotsKing using a small controlled Codex fixture",
+      "User authorized implementing and testing kingdots using a small controlled Codex fixture",
   },
 };
 const results: any = {

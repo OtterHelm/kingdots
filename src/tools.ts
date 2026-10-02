@@ -30,7 +30,7 @@ export function tools(manager: Manager, events: Events): Tool[] {
     {
       name: "task_list",
       description:
-        "List only tasks explicitly enrolled for DotsKing management.",
+        "List only tasks explicitly enrolled for kingdots management.",
       schema: z.object({}),
       readOnly: true,
       run: async () => manager.store.tasks(),
@@ -77,7 +77,7 @@ export function tools(manager: Manager, events: Events): Tool[] {
     {
       name: "session_attach",
       description:
-        "Attach only a verified DotsKing-owned inactive session in the same worktree. External writers remain read-only.",
+        "Attach only a verified kingdots-owned inactive session in the same worktree. External writers remain read-only.",
       schema: z.object({
         taskId,
         sessionId: z.string(),

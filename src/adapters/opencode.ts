@@ -45,7 +45,7 @@ export class OpenCodeAdapter implements Adapter {
     };
     const c = info.capabilities.find((c) => c.feature === "adopt_running")!;
     c.state = "unsupported";
-    c.notes = "External writers cannot be fenced by DotsKing";
+    c.notes = "External writers cannot be fenced by kingdots";
     return info;
   }
   private async connect() {

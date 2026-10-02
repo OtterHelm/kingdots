@@ -2,5 +2,5 @@
   "name": "kingdots", "version": "0.1.0",
   "description": "User-scoped local AI execution and verification",
   "skills": "./skills/", "mcpServers": "./.mcp.json",
-  "interface": { "displayName": "DotsKing", "shortDescription": "Manage local AI work and verification" }
+  "interface": { "displayName": "kingdots", "shortDescription": "Manage local AI work and verification" }
 }

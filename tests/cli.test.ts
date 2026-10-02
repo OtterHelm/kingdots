@@ -1,9 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { run, killTree, delay } from "../src/process.js";
+import { defaultDataDir } from "../src/runtime.js";
+
+test("default storage preserves existing preview data and respects explicit paths", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kingdots-path-"));
+  const originalLocal = process.env.LOCALAPPDATA;
+  const originalData = process.env.KINGDOTS_HOME;
+  try {
+    process.env.LOCALAPPDATA = root;
+    delete process.env.KINGDOTS_HOME;
+    const current = join(root, "kingdots");
+    const legacy = join(root, "DotsKing");
+    assert.equal(defaultDataDir(), current);
+    await mkdir(legacy);
+    assert.equal(defaultDataDir(), legacy);
+    await mkdir(current);
+    assert.equal(defaultDataDir(), current);
+    process.env.KINGDOTS_HOME = join(root, "explicit");
+    assert.equal(defaultDataDir(), process.env.KINGDOTS_HOME);
+  } finally {
+    if (originalLocal === undefined) delete process.env.LOCALAPPDATA;
+    else process.env.LOCALAPPDATA = originalLocal;
+    if (originalData === undefined) delete process.env.KINGDOTS_HOME;
+    else process.env.KINGDOTS_HOME = originalData;
+    if (!resolve(root).startsWith(resolve(tmpdir(), "kingdots-path-")))
+      throw new Error("Unsafe fixture cleanup");
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("CLI start, status and stop operate the owned background service", async () => {
   const root = await mkdtemp(join(tmpdir(), "kingdots-cli-"));
   const args = [process.execPath, "--import", "tsx", resolve("src/cli.ts")];

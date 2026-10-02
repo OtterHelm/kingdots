@@ -42,7 +42,7 @@ export async function installLocalPlugin(dataDir: string) {
     JSON.stringify(
       {
         name: "kingdots-local",
-        interface: { displayName: "DotsKing local" },
+        interface: { displayName: "kingdots local" },
         plugins: [
           {
             name: "kingdots",
