@@ -30,12 +30,33 @@ control local sessions, or finish overnight supervision. The placement error is
 an observed host compatibility failure; its underlying cause is not established.
 Do not label it a permission denial or promise that a reconnect will fix it.
 
+### Retest after personal-PC access was granted
+
+The user subsequently enabled the dot's personal-PC access and authorized a
+bounded retest in the same existing dot conversation. The dot called
+`cloud_threads.list_environments` and confirmed that the PC was connected,
+attached and authorized for tasks.
+
+That connection did not expose a direct official read tool for the selected
+existing local conversation. Dots reported that its available PC execution route
+would create a separate task conversation, which the user had excluded. It did
+not use that route, repeat the earlier failed cloud read, send a test instruction,
+or create a one-time schedule. kingdots tools remained absent from its tool list.
+
+The retest therefore confirms **personal-PC connection only**. Existing-session
+reading, sending and post-response requery remain blocked or untested. New
+sessions, credentials, billing and files were not changed. Usage was unavailable,
+not measured as zero. Neither Dots's built-in supervision nor kingdots's ability
+to supply the missing connection has passed this user's scenario.
+
 ## Installation is not actual Dots access
 
 The Codex-local plugin install and ChatGPT's account plugin connections are
-separate. The checked ChatGPT personal-plugin page had no entries. The dot profile
-showed its cloud computer connected; personal-PC access was not confirmed by that
-browser view. Neither observation proves all local plugin paths unsupported.
+separate. The checked ChatGPT personal-plugin page had no entries. The initial
+browser view confirmed only the cloud computer. Personal-PC access was later
+confirmed by the actual Dots retest above; that did not establish a working
+existing-session or kingdots tool connection. These observations do not prove all
+local plugin paths unsupported.
 
 According to [Dots computers and apps](https://learn.chatgpt.com/docs/dots/computers-and-apps),
 personal-PC access is separately enabled in the ChatGPT desktop app on that PC.

@@ -25,6 +25,8 @@ create new AI sessions or worktrees as part of this workflow.
 > **Not ready for unattended supervision:** the 2026-10-02 actual Dots connection
 > probe found no exposed kingdots tools and failed to read the selected local Codex
 > conversation. The essential connection gate has not passed.
+> A retest confirmed personal-PC access but still found no direct existing-session
+> read tool or exposed kingdots tools; no new session was created as a workaround.
 
 ## What is implemented
 

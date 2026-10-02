@@ -43,6 +43,14 @@ See [verification results](verification-results.md) for the separate outcomes.
 Registration, activation and host compatibility remain unresolved; an API-key
 tunnel is not an acceptable fallback under this project's no-API-billing policy.
 
+After the user enabled personal-PC access, actual Dots confirmed the PC was
+connected and authorized through `cloud_threads.list_environments`. It still had
+no direct official tool for reading the selected existing local conversation.
+The available PC execution route would create a separate task conversation, so
+it was not used under the no-new-session requirement. kingdots tools were still
+absent. No instruction or one-time schedule was created; personal-PC access alone
+has not passed this scenario.
+
 ## Wake-up and follow-up
 
 Use supported MCP Events or an actually supported Dots check-in. For the existing
