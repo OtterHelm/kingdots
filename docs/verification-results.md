@@ -1,45 +1,79 @@
-# 개발 중 검증 결과
+# Verification results
 
-아래는 **0.1.0 worker 실험의 개발 기록**입니다. 0.1.1의 기본 흐름은 Dots가 기존 세션을 관찰하고 관리하는 방식으로 변경됐습니다. 신규 worker 생성·실행의 공개 경로는 비활성화했으며 아래 실제 Codex 시험을 기존 세션의 밤새 관리 합격으로 사용하지 않습니다. 현재 검증 범위는 [검증 문서](verification.md), 최신 전체 검사 결과는 해당 커밋의 GitHub Actions run을 확인하세요.
+Checked on **2026-10-02 (Asia/Seoul)**. Results describe the tested installation,
+not universal support. Raw account, session and machine records stay in ignored
+local storage; public documentation contains no account IDs or callback secrets.
 
-기록 일자: **2026-10-02 (Asia/Seoul)**. 이 기록은 해당 개발 환경에서 확인한 결과이며 모든 설치 환경의 지원을 선언하지 않습니다. 로컬 원본 로그에는 계정·작업 정보가 포함될 수 있으므로 공개 저장소에는 아래 요약과 재현 가능한 시험 코드를 제공합니다.
+## Current observer: 0.1.1
 
-## 환경
+Version 0.1.1 implements local records for Dots supervising user-selected existing
+sessions. The essential Dots connection gate has not passed. This workflow does
+not create workers or worktrees.
 
-| 항목      | 확인한 값           |
-| --------- | ------------------- |
-| OS        | Windows             |
-| Node.js   | 24.18.0             |
-| npm       | 11.16.0             |
-| Git       | 2.55.0.windows.3    |
-| Codex CLI | 0.145.0             |
-| 작업 인증 | 기존 ChatGPT 로그인 |
+| Check                                   | Result                                           | Evidence and limits                                                                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local Windows CI                        | Passed                                           | [Run 37011862699](https://github.com/OtterHelm/kingdots/actions/runs/37011862699), commit `912a2e0898a48de98f1bcff5717d09d76b950058`: types, **40/40 tests**, build, package and source fingerprint |
+| Observer safety                         | Passed in controlled tests                       | Existing-session registration without new workers; fresh observations; duplicate claims; unknown delivery; intervention; restart fencing; referenced completion conditions                          |
+| Local dashboard                         | Passed controlled browser check                  | Registration, details, pause/resume, Dots panel and mobile layout with a fictitious session; no real session control                                                                                |
+| Installed local plugin                  | Passed                                           | `kingdots@kingdots-local` 0.1.1 installed and enabled; absolute stdio executable and data-directory paths                                                                                           |
+| Local MCP                               | Passed                                           | Official SDK connected to the installed stdio configuration, listed **16 tools**, queried watches and discovered event protocol `2026-07-28`; no provider model calls                               |
+| Actual Dots kingdots tools              | **Not connected in the tested Dots environment** | User-authorized probe of the existing dot found no `kingdots`, `watch_list` or `capabilities_list` tools; neither query could be called by Dots                                                     |
+| Actual Dots existing local session read | **Attempted; failed**                            | Official `cloud_threads.read` call failed with `unsupported placement format version 2`; the local Codex caller's successful read does not substitute for a Dots read                               |
+| Actual Dots same-session instruction    | Not tested                                       | Probe was read-only; no message or interruption was sent to the selected coding conversation                                                                                                        |
+| Actual Dots event/check-in              | **Unverified**                                   | Dots queried available event sources and reported kingdots absent. Scheduled-check tools were present, but no schedule was created or post-response execution tested                                |
+| Live kingdots subscriptions             | None at check time                               | Local subscription count was 0; no recorded Dots decision. An empty count alone is not proof that the host lacks event support                                                                      |
+| Account/permission/billing changes      | None                                             | No API key, tunnel, computer-access grant, billing change, new session or worker was created by this check                                                                                          |
 
-## 확인한 결과
+The actual Dots report was delivered in its existing conversation. That report
+proves the bounded probe ran; it does **not** prove kingdots can wake Dots, read or
+control local sessions, or finish overnight supervision. The placement error is
+an observed host compatibility failure; its underlying cause is not established.
+Do not label it a permission denial or promise that a reconnect will fix it.
 
-| 시험                  | 결과           | 범위와 근거                                                                                                      |
-| --------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| TypeScript 타입 검사  | 통과           | `npm run typecheck`: 서비스와 React 코드                                                                         |
-| 기본 자동 시험        | **29/29 통과** | `npm test`: `tests/`의 통제된 어댑터·Git 프로젝트·CLI·MCP·서명 callback 시험                                     |
-| 배포 빌드             | 통과           | `npm run build`: TypeScript와 Vite                                                                               |
-| 로컬 패키지           | 통과           | `npm pack`: 기본 검사 뒤 tarball 생성. CLI·설치 도구 포함, `.kingdots`·비밀 파일 제외 확인                       |
-| 실제 Codex 수정·검증  | 통과           | `scripts/live-codex.ts`: 잘못된 덧셈 구현 수정, 독립 테스트 통과, 완료 근거 저장                                 |
-| 실제 Codex 세션 제어  | 통과           | 같은 세션 후속 지시, 실행 중 지시, 확인된 중단, 이어가기, 관리 해제                                              |
-| 원본 보존             | 통과           | 실제 시험 프로젝트의 원본은 변경되지 않고 결과는 worktree에 유지                                                 |
-| API 과금 인증 차단    | 통과           | `tests/codex.test.ts`: API 키·다른 제공자·확인되지 않은 인증 거부, 다음 턴 전에 인증 재확인                      |
-| 표준 서비스 실행 보류 | 통과           | `tests/manager.test.ts`: 과금 경로 미검증 backend는 작업 생성·실행 전에 거부                                     |
-| 실제 로컬 MCP         | 통과           | `scripts/local-connection-check.ts`: 공식 SDK로 **16개 도구** 조회·지원 상태 호출, **모델 호출 0회**             |
-| 로컬 플러그인 설치    | 통과           | 공식 Codex CLI 목록에서 `kingdots@kingdots-local`의 설치·활성화와 절대 stdio 실행 경로 확인                      |
-| 웹 화면               | 개발 중 확인   | 작업 상세·등록·Dots 상태와 데스크톱/모바일 레이아웃 확인. 이후 문구 변경을 전체 시각 회귀 시험으로 계산하지 않음 |
+## Installation is not actual Dots access
 
-실제 Codex 통합 시험의 지휘자는 테스트 스크립트입니다. 이 결과는 Dots 자체의 자동 지휘 시험을 대신하지 않습니다. API 과금 차단은 표준 CLI 서비스의 인증·제공자 경로에 적용하며 사용자의 기존 구독 한도와 크레딧 설정을 변경하지 않습니다.
+The Codex-local plugin install and ChatGPT's account plugin connections are
+separate. The checked ChatGPT personal-plugin page had no entries. The dot profile
+showed its cloud computer connected; personal-PC access was not confirmed by that
+browser view. Neither observation proves all local plugin paths unsupported.
 
-## 아직 통과하지 않은 합격 조건
+According to [Dots computers and apps](https://learn.chatgpt.com/docs/dots/computers-and-apps),
+personal-PC access is separately enabled in the ChatGPT desktop app on that PC.
+Codex computer access and Work Sync alone are insufficient. Availability of the
+specific local kingdots plugin must still be proved by a real Dots tool call.
 
-- 최초 응답 종료 후 실제 Dots가 새 사용자 메시지 없이 결과를 확인하고 보완 지시·재검증·최종 보고를 수행하는 흐름.
-- 실제 Dots의 로컬 도구 접근과 이벤트 또는 지원되는 예약 확인을 통한 자동 후속 판단.
-- Claude Code·OpenCode의 API 과금 없는 실제 실행 인증과 같은 작업 시나리오.
-- Codex 앱의 기존 세션 제어권과 Claude 앱 Code / Chat / Cowork 각각의 공식 외부 제어 경로.
-- 모든 제공자에서의 네이티브 다중 세션·프로세스 재시작·오프라인 복구 스트레스 시험.
+According to [MCP Events](https://developers.openai.com/plugins/build/mcp-events),
+the actual host must discover and subscribe to events and verify a signed
+callback. Local protocol discovery, a webhook `2xx`, instruction claims and
+`decision_ack` each prove separate steps; none alone proves post-response Dots
+judgment. An API-key tunnel remains disabled under the no-API-billing constraint.
 
-합격 절차는 [Dots 연결 문서](dots-connection.md), 시험 범위는 [검증 문서](verification.md), 기능 계약은 [인터페이스 문서](interfaces.md)에 있습니다. 업데이트할 때에는 실제 시험 결과와 설치 버전을 함께 기록하고 미검증 조건을 완료로 변경하지 않습니다.
+## Remaining acceptance
+
+- Expose kingdots tools to actual Dots and successfully call read-only queries.
+- Read a user-selected existing local coding session through a working official
+  host route; reconcile ownership and current activity before any write.
+- Prove authorized guidance reaches the same existing session without a second
+  process, a new session, or interruption of healthy work.
+- After the initial Dots response ends and without another user message, handle a
+  routine question and an error, inspect fresh test/artifact evidence and report.
+- Verify pause, manual intervention, unknown delivery and recovery with the real
+  host, beyond controlled local tests.
+
+Claude Code, OpenCode and Codex/Claude desktop external control remain experimental
+or unverified. No coding-agent model calls were made in this connection check;
+the actual Dots probe uses the existing product allowance. Broader adapter work
+does not replace the required Dots/Codex existing-session acceptance.
+
+## Historical worker experiment: 0.1.0
+
+Earlier tests used Windows, Node.js 24.18.0, npm 11.16.0, Git 2.55.0.windows.3 and
+Codex CLI 0.145.0 with existing ChatGPT login. That version passed 29 controlled
+tests plus a live Codex repair, follow-up, interruption and worktree-preservation
+experiment. Its supervisor was a test script, not actual Dots. Public worker
+creation/execution endpoints were disabled in 0.1.1; those results are historical
+and **cannot pass the current overnight supervision requirement**.
+
+See [test scope](verification.md), [connection acceptance](dots-connection.md) and
+[interfaces](interfaces.md). Keep tested versions, actual failures and untested
+steps distinct whenever this record is updated.

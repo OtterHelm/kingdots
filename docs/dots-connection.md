@@ -9,8 +9,15 @@ messaging the existing sessions selected by the user.
 1. Build the checkout, start the local service and run `kingdots install-plugin`
    (or `node dist/cli.js install-plugin`). This refreshes the versioned installed
    plugin and binds absolute executable and data-directory paths.
-2. Reload supported plugin connections and test a new conversation. Ensure the
-   actual Dots profile has the computer and required plugins connected.
+2. Check the actual Dots profile separately. `install-plugin` installs a local
+   Codex plugin; it does not register a private ChatGPT plugin or grant Dots access
+   to the PC. Dots's cloud computer is also distinct from the personal computer.
+   The documented personal-PC connection is in the ChatGPT desktop app on that
+   PC: dot profile → Computers → Your computer → Allow access. Review that access
+   explicitly; do not change credentials or permissions during a read-only check.
+   A Codex computer connection or Work Sync alone does not grant Dots this access.
+   Reload supported plugin connections and verify actual Dots tool calls. Do not
+   assume a Codex-local plugin will be exposed to Dots automatically.
 3. Verify real host reads of the selected session IDs and the official follow-up
    tool's ownership, busy-state, interruption and permission behavior.
 4. Enroll those existing sessions with `watch_create`. Registration must not start
@@ -19,6 +26,22 @@ messaging the existing sessions selected by the user.
 See [Dots computers and apps](https://learn.chatgpt.com/docs/dots/computers-and-apps)
 and [local plugin packaging](https://developers.openai.com/plugins/build/plugins).
 Local tool discovery in a normal Codex chat does not establish actual Dots access.
+
+## Observed connection limits
+
+The 2026-10-02 check of version 0.1.1 connected to the installed local MCP plugin,
+listed all 16 tools and queried watches without a provider model call. A separate,
+user-authorized request to the actual existing dot found no exposed kingdots
+tools. Its official `cloud_threads.read` call for the selected existing local
+Codex conversation failed with `unsupported placement format version 2`. This
+does not establish a permission failure or a successful session read.
+
+Dots reported that scheduled-check tools were available, but kingdots was absent
+from its listed event sources. No schedule was created and no post-response
+wake-up was tested. Existing-session sending was deliberately not attempted.
+See [verification results](verification-results.md) for the separate outcomes.
+Registration, activation and host compatibility remain unresolved; an API-key
+tunnel is not an acceptable fallback under this project's no-API-billing policy.
 
 ## Wake-up and follow-up
 

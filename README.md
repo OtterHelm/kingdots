@@ -22,6 +22,9 @@ create new AI sessions or worktrees as part of this workflow.
 > are implemented. **Actual Dots access to host session tools, safe external session
 > control and automatic follow-up after the initial response ends are still unverified.**
 > Installing the plugin does not mean overnight supervision is running.
+> **Not ready for unattended supervision:** the 2026-10-02 actual Dots connection
+> probe found no exposed kingdots tools and failed to read the selected local Codex
+> conversation. The essential connection gate has not passed.
 
 ## What is implemented
 
@@ -153,6 +156,14 @@ The plugin contains a management skill and 16 MCP tools. See the [interface cont
 It uses local stdio without a Platform API key. Reload supported plugin connections
 and confirm that actual Dots can use both kingdots and the official host session tools.
 Ordinary Codex plugin discovery does not establish actual Dots access.
+
+`install-plugin` installs into Codex's local plugin environment. Dots's account
+plugins and personal-PC access are separate connections; its cloud computer does
+not establish access to this PC. In the 2026-10-02 actual Dots probe, kingdots tools
+were not exposed and the selected local Codex conversation could not be read
+through the tested host route. Same-session sending and unattended wake-up have
+not passed. See the [dated verification results](docs/verification-results.md)
+and [connection guide](docs/dots-connection.md).
 
 The minimal release focuses on existing Codex sessions. Codex CLI metadata reads
 are available, while direct Codex app read/control through the local service is
