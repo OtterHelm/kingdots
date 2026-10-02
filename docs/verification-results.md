@@ -5,20 +5,61 @@ performed on 2026-10-02. Results describe the tested installation or working tre
 not universal support. Raw account, session and machine records stay in ignored
 local storage; public documentation contains no account IDs or callback secrets.
 
-## Planning relay check: 2026-10-03
+## Actual Dots message probe: 2026-10-03
+
+The installed `codex-app-tools` **0.1.5** relay, called by an ordinary Node process
+with the genuine local executor context, accepted two bounded messages to the
+already-existing actual Dots conversation. The first requested a read-only ready
+reply; the second requested the currently exposed existing-task follow-up schema.
+The process journaled each command before dispatch and did not retry either send.
+
+Both replies were observed in the actual Dots conversation through the browser.
+The ready reply preceded the separate capability request and reply. This proves
+actual Dots received and responded to local-program attention messages after its
+earlier user-visible reply. It does **not** prove delivery to a coding session or
+the five-minute intervention objective; response timestamps were not recovered
+through an automated return channel.
+
+| Check                                                       | Observed result                                                                                                                                                                |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Local program to existing actual Dots                       | Two native host receipts identified the selected existing conversation; both requested replies appeared in its user-facing conversation                                        |
+| Native `read_thread` / `wait_threads` return channel        | Engine metadata and delegated input were available, but the observed user-facing Dots replies were absent; five read pages did not recover the ready reply                     |
+| Dots's currently exposed follow-up schema                   | Dots reported `mcp__codex_apps__cloud_threads_send_message`, requiring `prompt` and `threadId`; the description covers an existing cloud task, with no local `hostId` selector |
+| That tool controlling the selected local Codex conversation | **Unverified**; the capability probe did not send or interrupt the coding conversation                                                                                         |
+| Coding-session instructions from these probes               | None; no new conversation, model API key, tunnel or account/billing change                                                                                                     |
+| Usage                                                       | No model call in the local collection/relay program; actual Dots product usage was unavailable, not zero                                                                       |
+
+A finite background trial has been prepared for the next gate: observe the source
+Codex response end, re-read the original conversation, then ask actual Dots to
+deliver the previously authorized file-free marker once through its own official
+existing-task tool if its authorization and target checks permit it. Match the
+original target, host-provided sender provenance, correlation value, actual reply
+and file fingerprint. New or unverifiable input stops the local trial; unknown
+delivery is held without retry. A sent attention message cannot be atomically
+recalled or reserve the target, so this is a bounded experiment, not production
+intervention safety. Its post-response result remains **pending**.
+
+The local plugin remains 0.1.2. This diagnostic has not added a supported service
+command, exposed an endpoint or passed overnight acceptance. Private identities,
+messages and receipts remain in ignored local storage.
+
+## Earlier planning relay check: 2026-10-03
 
 For the existing-session supervision plan, an ordinary Node process used the
 installed official `codex-app-tools` 0.1.5 relay with genuine executor context to
-read the selected existing actual Dots conversation on its durable host. The
-host returned the expected conversation and an idle state. Combined with the
-earlier local Codex read, this establishes read access to both endpoints from
-the local program, **not direct tool access from Dots**.
+read metadata for the selected existing actual Dots conversation on its durable
+host. The host returned the expected conversation and an idle state. Combined
+with the earlier local Codex read, this establishes the program's access to local
+Codex content and Dots engine metadata, **not direct tool access from Dots or a
+read of its user-facing conversation**.
 
 The send and wait methods were advertised; neither was used to send a message in
 this planning check. It started no AI conversation or model request and opened
-no external tunnel. A finite read-only diagnostic was prepared and started to
-re-read both endpoints after this source response ends; its result is **pending**.
-No post-response Dots decision or unattended acceptance is claimed.
+no external tunnel. A finite read-only diagnostic ran for ten minutes but expired
+before the source response ended. Its result was
+`source_turn_completion_not_observed`, with no message sent. This is a timing
+failure of that trial, not evidence that background context was denied. No
+post-response Dots decision or unattended acceptance is claimed by that check.
 
 The [interview and validation plan](overnight-supervision-plan.md) keeps Codex
 app as the first real target, all five products as the eventual support goal,

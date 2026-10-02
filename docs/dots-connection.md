@@ -28,6 +28,24 @@ attention events. Dots remains the supervisor. Host access can use the local
 
 See [deployment](deployment.md) for environment, ports and restart procedures.
 
+## Experimental existing-app attention path
+
+A bounded diagnostic using the installed official app-tool relay delivered
+read-only attention messages to an already-existing actual Dots conversation.
+Both replies appeared in its normal conversation. This does not require an
+externally exposed endpoint, a new AI conversation or a model API key.
+
+The tested native read/wait methods returned Dots engine metadata but omitted
+those user-facing replies. Do not parse arbitrary transcript text or mark a
+native send receipt as a returned Dots decision. Dots also reported an official
+existing-cloud-task follow-up tool; acceptance of an existing local Codex target
+still needs independent verification. This diagnostic is not a supported CLI or
+plugin connection mode, and the installed plugin does not activate it.
+
+See the [validation plan](overnight-supervision-plan.md) and
+[dated results](verification-results.md) for the background, same-session,
+authorization, intervention and overnight gates.
+
 ## Experimental external OAuth route
 
 The current source adds a separate gateway for an OAuth-capable ChatGPT connector.

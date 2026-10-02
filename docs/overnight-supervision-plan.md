@@ -29,20 +29,27 @@ remain blocked for the user while other eligible sessions continue.
 
 - The existing Codex app conversation was actually read through the installed
   official `codex-app-tools` stdio relay; active-session guidance was blocked.
-- During this planning check, the same kind of programmatic relay actually read
-  the selected existing Dots conversation on its durable host. The official send
-  and wait tools were advertised, but **no live send was performed**.
-- These reads created no conversation, model call, API key or external tunnel.
+- The same kind of programmatic relay read the selected Dots engine's metadata
+  on its durable host. This does not return its normal user-facing conversation.
+- Subsequent bounded probes actually sent two read-only messages to the existing
+  actual Dots conversation. Both requested replies appeared in that conversation.
+  Native read/wait results did not expose those replies, so the proposed automatic
+  decision-return channel has not passed.
+- Dots reported a real existing-cloud-task follow-up tool. Its applicability to
+  the selected existing local Codex conversation still needs a send test.
+- These probes created no conversation, API key or external tunnel. The local
+  program makes no model calls; actual Dots replies use the product allowance.
 - Dots's earlier native PC probe established a connected, authorized computer,
   but did not establish existing-task control. The earlier cloud read failed with
   `unsupported placement format version 2`; its underlying cause remains unknown.
-- A finite, model-free diagnostic was started to read both selected conversations
-  after this source response ends. Its result is **pending**, not a successful
-  Dots wake-up or an acceptance result. Private receipts stay in ignored storage.
+- The first finite read-only diagnostic expired before the source response ended;
+  it did not test post-response context. A new finite trial is prepared to start
+  immediately before the source reply ends. Private receipts stay in ignored storage.
 
 The relay requires genuine executor-provided context and depends on the installed
 app-tool version. It is not established as a stable standalone background-service
-contract. Reading both conversations does not prove that either can be written.
+contract. Local reads and accepted Dots messages do not prove a coding-session
+write or a complete overnight loop.
 
 ## Connection strategies
 
@@ -70,8 +77,12 @@ app relay as a minimal alternative:
 1. A normal local program observes only enrolled existing coding conversations.
 2. When their state needs judgment, it sends a correlated observation to the
    already-existing actual Dots conversation through the official app message tool.
-3. Dots returns a scoped decision in that conversation.
-4. The program accepts only a decision associated with the expected Dots turn,
+3. Prefer Dots delivering guidance through its own verified existing-task tool,
+   with the program checking the original coding conversation for its source,
+   correlation and actual result. First test whether the exposed cloud-task tool
+   accepts the selected local conversation; do not assume it does.
+4. If guidance instead returns through a program-readable channel, the program
+   accepts only a decision associated with the expected Dots turn,
    observation, watch, ownership epoch and unpredictable correlation value. It
    delivers that decision to the exact enrolled coding conversation and journals
    the host receipt.
@@ -84,9 +95,12 @@ flowchart LR
     K -->|Official follow-up| C
 ```
 
-This route is a **hypothesis with real read evidence**, not implemented or verified
-end-to-end. It may avoid an externally exposed MCP endpoint. Its notification,
-decision-return and background-context behavior each need their own real test.
+This route has **actual Dots message/reply evidence**, but is not implemented or
+verified end-to-end. The tested native Dots read route omitted its user-facing
+replies, so it cannot yet supply the proposed automatic return channel. Dots's
+own follow-up tool is an alternative still needing local-target verification.
+The route may avoid an externally exposed MCP endpoint. Background context,
+same-session guidance and correlated completion each need their own real test.
 Do not treat arbitrary text in a transcript as a command or user approval. The
 original human grant determines targets and scope; Dots's decision cannot broaden
 that grant or approve host permissions.

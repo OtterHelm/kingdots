@@ -14,6 +14,12 @@ Controlled fixtures cover those additions. One actual installed-host read of the
 selected local conversation passed on Windows, with active-session sending blocked.
 Actual Dots compatibility and live idle-session sending remain unverified.
 
+Bounded native app messages now have actual Dots receipt and user-facing reply
+evidence. The read/wait return path omits those replies. The next connectivity
+trial is Dots's own existing-task follow-up tool against the selected local Codex
+conversation, after the source response has ended; its local-target compatibility
+and background lifecycle remain unverified. See [dated results](verification-results.md).
+
 Only the following release work is required:
 
 The [overnight validation plan](overnight-supervision-plan.md) records the
