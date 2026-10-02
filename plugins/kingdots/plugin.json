@@ -1,9 +1,16 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kingdots",
-  "version": "0.1.0",
-  "description": "Manage user-selected coding tasks through kingdots with independently verified completion evidence.",
+  "version": "0.1.1",
+  "description": "Let Dots observe and supervise user-selected existing coding sessions without creating workers",
   "license": "Apache-2.0",
   "repository": "https://github.com/OtterHelm/kingdots",
-  "extensions": { "com.openai": { "interface": { "displayName": "kingdots", "shortDescription": "Manage local AI work and verification" } } }
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "kingdots",
+        "shortDescription": "Manage local AI work and verification"
+      }
+    }
+  }
 }

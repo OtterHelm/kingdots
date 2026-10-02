@@ -104,8 +104,8 @@ export class Events {
         name,
         description:
           name === "task.completed"
-            ? "Completion evidence was confirmed. Retrieve the task and report the result."
-            : "A selected task needs a supervisor decision after verification, an error, or a connection change.",
+            ? "A completion report was recorded. Read the watch and referenced host evidence; host reports are not independently verified by this service."
+            : "An enrolled existing session needs Dots to inspect a question, stopped response, error, or stale/unknown connection.",
         delivery: ["webhook"],
         inputSchema: {
           type: "object",
@@ -128,7 +128,12 @@ export class Events {
   }
   async subscribe(raw: unknown, owner = "dots") {
     const input = subscribeSchema.parse(raw);
-    this.store.getTask(input.arguments.taskId);
+    try {
+      this.store.getWatch(input.arguments.taskId);
+    } catch (e) {
+      if ((e as DomainError).code !== "not_found") throw e;
+      this.store.getTask(input.arguments.taskId);
+    }
     const cursor =
       input.cursor === null || input.cursor === undefined
         ? 0

@@ -336,8 +336,10 @@ test("unavailable usage is not estimated and unenforceable strict budgets are re
     await f.cleanup();
   }
 });
-test("external session attachment is refused", async () => {
+test("external session adoption is absent from the public observer tools", async () => {
   const f = await fixture();
+  const { Observer } = await import("../src/watch.js");
+  const observer = new Observer(f.store, f.manager.adapters);
   try {
     const task = await repaired(f);
     const events = new Events(f.store, {
@@ -345,14 +347,15 @@ test("external session attachment is refused", async () => {
       set: async () => {},
     });
     await assert.rejects(
-      callTool(tools(f.manager, events), "session_attach", {
+      callTool(tools(f.manager, events, observer), "session_attach", {
         taskId: task.id,
         sessionId: "external",
         epoch: task.epoch,
       }),
-      /Confirmed owned/,
+      /Unknown tool/,
     );
   } finally {
+    await observer.close();
     await f.cleanup();
   }
 });

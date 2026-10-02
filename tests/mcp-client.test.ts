@@ -21,8 +21,9 @@ test("official MCP SDK client initializes, lists tools, and calls the HTTP endpo
       }),
     );
     const listed = await client.listTools();
-    assert.ok(listed.tools.some((t) => t.name === "task_create"));
-    const result = await client.callTool({ name: "task_list", arguments: {} });
+    assert.ok(listed.tools.some((t) => t.name === "watch_create"));
+    assert.ok(!listed.tools.some((t) => t.name === "task_create"));
+    const result = await client.callTool({ name: "watch_list", arguments: {} });
     assert.equal(result.isError, false);
     assert.deepEqual(JSON.parse((result.content as any)[0].text), []);
   } finally {

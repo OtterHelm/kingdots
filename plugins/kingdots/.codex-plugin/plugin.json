@@ -1,6 +1,11 @@
 {
-  "name": "kingdots", "version": "0.1.0",
-  "description": "User-scoped local AI execution and verification",
-  "skills": "./skills/", "mcpServers": "./.mcp.json",
-  "interface": { "displayName": "kingdots", "shortDescription": "Manage local AI work and verification" }
+  "name": "kingdots",
+  "version": "0.1.1",
+  "description": "Let Dots observe and supervise user-selected existing coding sessions without creating workers",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "kingdots",
+    "shortDescription": "Manage local AI work and verification"
+  }
 }

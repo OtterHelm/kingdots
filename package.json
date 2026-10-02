@@ -1,7 +1,7 @@
 {
   "name": "kingdots",
-  "version": "0.1.0",
-  "description": "Local, evidence-driven multi-agent execution tools for Dots",
+  "version": "0.1.1",
+  "description": "Local observation and decision records for Dots supervising existing AI sessions",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {

@@ -1,92 +1,61 @@
-# Connect Dots without API billing
+# Dots supervises existing sessions
 
-The default connection is local stdio MCP. No Platform API key, tunnel runtime,
-model API fallback, payment setup or automatic credit purchase is used.
+The local plugin supplies kingdots records and attention events. The actual Dots
+feature is the supervisor and must also have official host tools for reading and
+messaging the existing sessions selected by the user.
 
-Run `kingdots install-plugin` (or `node dist/cli.js install-plugin` from a built
-checkout). This prepares a dedicated per-user local marketplace, binds absolute
-Node/CLI paths and installs the local plugin through the supported Codex CLI.
-It preserves other marketplace entries and never handles provider API keys.
+## Local setup
 
-Alternatively, build/install the CLI, then use the repo marketplace at
-`.agents/plugins/marketplace.json` to install `kingdots@kingdots-local` through
-the desktop app or supported Codex plugin CLI. The package's MCP command is
-`kingdots mcp`. For a checkout without a package installation, register the
-absolute Node/compiled CLI paths with `codex mcp add` instead. The CLI uses the
-same per-user protected local service tokens; those are not paid provider API keys.
+1. Build the checkout, start the local service and run `kingdots install-plugin`
+   (or `node dist/cli.js install-plugin`). This refreshes the versioned installed
+   plugin and binds absolute executable and data-directory paths.
+2. Reload supported plugin connections and test a new conversation. Ensure the
+   actual Dots profile has the computer and required plugins connected.
+3. Verify real host reads of the selected session IDs and the official follow-up
+   tool's ownership, busy-state, interruption and permission behavior.
+4. Enroll those existing sessions with `watch_create`. Registration must not start
+   a session, resume a second process or prepare a new worktree.
 
-Restart or reload supported plugin connections, connect the computer to the
-actual dot through its profile, and test that the dot can use the local tools.
-Ordinary Codex plugin discovery is not proof that the cloud dot can use them.
-See [computer and app access](https://learn.chatgpt.com/docs/dots/computers-and-apps)
-and [local plugins](https://developers.openai.com/plugins/build/plugins).
+See [Dots computers and apps](https://learn.chatgpt.com/docs/dots/computers-and-apps)
+and [local plugin packaging](https://developers.openai.com/plugins/build/plugins).
+Local tool discovery in a normal Codex chat does not establish actual Dots access.
 
-If direct local events cannot wake Dots, use only a supported task-specific
-scheduled check-in in the actual Dots environment and run the acceptance below.
-Do not manufacture an API supervisor or claim an ordinary chat heartbeat is Dots.
+## Wake-up and follow-up
 
-## Optional official tunnel path — disabled
+Use supported MCP Events or an actually supported Dots check-in. For the existing
+event contract, subscribe to `task.attention_required`/`task.completed` using
+`arguments: {taskId: watch.id}`. Keep subscription scope limited to enrolled watches.
+The service retains signed verification, retry records and durable event cursors.
+See [MCP Events](https://developers.openai.com/plugins/build/mcp-events).
 
-The following reference is retained for interoperability. Do not start this path
-under the current no-API-billing requirement. It needs a runtime API key, and the
-official guide does not establish a transport price. An inert tunnel may exist
-in the account; without a runtime/client it does not forward local tools.
+On attention, Dots reads `watch_get`, refreshes the original host state and records
+`watch_observe`. A scoped answer or repair is prepared and claimed once, sent by
+Dots through a verified official host tool to the same session, then recorded with
+`watch_instruction_receipt`. The service supplies no such host transport itself.
+If that tool is unavailable, leave the instruction unsent and report the limitation.
 
-This is a user-operated account setup step. Review credentials, tunnel
-associations, developer-mode access, and plugin permissions before proceeding.
-Do not paste secrets into an AI conversation or repository files.
+Do not manufacture a separate API supervisor or use an arbitrary normal-chat loop
+as proof that actual Dots wakes automatically. Secure MCP Tunnel operation remains
+disabled because its runtime requires an API key under the no-API-billing constraint.
+No credentials, billing settings or account schedules are changed by this setup.
 
-1. Install/build kingdots and make its CLI available to the tunnel process.
-   Start the service and run `kingdots doctor`.
-2. Follow the [official Secure MCP Tunnel guide](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
-   Create a tunnel associated with the intended Platform organization and
-   ChatGPT workspace. A tunnel runtime API key is required; it is not a new
-   judgment model and does not establish provider usage accounting.
-3. Configure the official tunnel client to invoke the stdio command
-   `kingdots mcp`. Alternatively use the absolute Node and compiled CLI paths.
-   Pass the same `KINGDOTS_HOME` as the service. The stdio bridge authenticates
-   locally without putting the dashboard token into the tunnel profile.
-4. Run the official client's `doctor`, then `run`. kingdots implements legacy
-   MCP initialization for local clients and the `2026-07-28` discovery/event
-   methods for the documented MCP Events integration. The installed tunnel
-   and Dots versions must be tested for compatibility.
-5. Register a developer-mode plugin using the tunnel connection. Add the
-   management skill from `plugins/kingdots/skills/manage-work/SKILL.md` through
-   a supported plugin authoring workflow. Do not invent connector IDs or
-   manually substitute tunnel IDs into an undocumented manifest field.
-6. Ask Dots to manage a selected small Git project with explicit checks.
-   Subscribe to `task.attention_required` and `task.completed`, with
-   `arguments: {taskId: "the-created-id"}`. The subscription API verifies the
-   signed callback and persists its owner, filters, expiration, and delivery
-   records. Secret storage uses the local protected vault.
+## Required acceptance
 
-The [official MCP Events guide](https://developers.openai.com/plugins/build/mcp-events)
-defines callback verification, Standard Webhooks signatures, and payloads.
-kingdots retries transient webhook failures up to five attempts, preserving
-the event ID. It stops retrying rejected or expired endpoints and never follows
-redirects. Callback DNS addresses are checked and pinned on every connection.
+- Start an ordinary coding session before assigning supervision to Dots.
+- Give Dots the exact session ID, original goal, scope and completion conditions.
+- Let Dots's initial response end, then send no further user message.
+- Observe healthy work without an unnecessary instruction or a new session.
+- Reproduce a routine question and an error/stop. Observe actual Dots inspecting
+  context and sending authorized follow-ups into that same existing session.
+- Confirm Dots reads fresh test/artifact evidence and delivers the final report.
+- Verify permission/user-only decisions stay pending, manual intervention fences
+  automatic writes, and pause/release leaves the original session running.
+- Verify a lost host response becomes unknown and is reconciled before another send.
+- Stop the subscription/check-in when management is paused, released or completed.
 
-## Required end-to-end acceptance
+Webhook `2xx`, instruction claims, host-reported receipts and `decision_ack` are
+records of separate steps. None proves the initial response ended, the actual dot
+woke, or a final report reached the user. This acceptance remains unverified.
 
-- Record the original Dots request, selected task ID, and subscription.
-- Let the original response finish, then provide no further user message.
-- Observe the worker result, saved verification, webhook receipt, and Dots's
-  subsequent `task_get`/`decision_ack`/follow-up activity.
-- Exercise a failing check, a repair instruction, and fresh passing checks.
-- Confirm Dots's final evidence-based report reaches the user.
-- Confirm no intermediate approval is requested for scoped routine work.
-  Confirm required provider permission prompts still wait for the user.
-- End the subscriptions/follow-up schedule after completion or release.
-
-Webhook `2xx` only proves receipt. `decision_ack` records a follow-up observed
-through MCP but cannot prove the original response ended or the final report
-was delivered. The dashboard therefore keeps unattended acceptance unverified
-until the real scenario is independently observed and documented.
-
-If event connectivity is unavailable, test a supported Dots scheduled check-in
-with this same acceptance scenario. Reuse the existing task context and stop
-the follow-up after completion/release. kingdots does not create account
-schedules or a replacement model loop itself.
-
-The computer, desktop app, service, and tunnel must remain online for local
-steps. Work does not silently migrate to a different machine or cloud folder.
+The PC, desktop app and local service must remain available. Failure to read a
+session must be reported as unknown/unavailable, not as healthy or completed work.

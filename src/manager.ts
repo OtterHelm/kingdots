@@ -58,7 +58,10 @@ export class Manager {
   }
   private recover() {
     for (const command of this.store.commands())
-      if (["queued", "dispatching", "accepted"].includes(command.status)) {
+      if (
+        command.action !== "existing_session_follow_up" &&
+        ["queued", "dispatching", "accepted"].includes(command.status)
+      ) {
         command.status = "unknown";
         command.updatedAt = new Date().toISOString();
         this.store.saveCommand(command);

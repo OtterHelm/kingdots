@@ -7,8 +7,9 @@ import { z } from "zod";
 import { Manager } from "./manager.js";
 import { Events } from "./events.js";
 import { tools, callTool, toolDefinitions } from "./tools.js";
-import { DomainError, commandSchema } from "./domain.js";
+import { DomainError } from "./domain.js";
 import { fingerprint } from "./workspace.js";
+import { Observer } from "./watch.js";
 
 function equal(actual: string, expected: string) {
   const a = Buffer.from(actual),
@@ -19,10 +20,17 @@ export function buildServer(
   manager: Manager,
   events: Events,
   tokens: { ui: string; mcp: string },
-  options: { webDir?: string; onShutdown?: () => void } = {},
+  options: {
+    webDir?: string;
+    onShutdown?: () => void;
+    observer?: Observer;
+  } = {},
 ) {
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
-  const registry = tools(manager, events);
+  const observer =
+    options.observer ?? new Observer(manager.store, manager.adapters);
+  if (!options.observer) app.addHook("onClose", async () => observer.close());
+  const registry = tools(manager, events, observer);
   app.addHook("onRequest", async (req, reply) => {
     const authority =
       /^(?:127\.0\.0\.1|localhost|\[::1\])(?::([0-9]{1,5}))?$/i.exec(
@@ -75,11 +83,15 @@ export function buildServer(
   });
   app.get("/healthz", async () => ({ status: "ok", service: "kingdots" }));
   app.get("/api/status", async () => ({
-    version: "0.1.0",
+    version: "0.1.1",
     connectionMode: "local-stdio",
     apiBilling: "forbidden",
     tunnelEnabled: false,
     tasks: manager.store.tasks().length,
+    watches: manager.store.watches().length,
+    mode: "existing_session_observer",
+    supervisor: "dots",
+    createsSessions: false,
     connection: manager.store.get("settings", "dots_connection") ?? {
       unattendedAcceptance: "unverified",
     },
@@ -91,72 +103,67 @@ export function buildServer(
     lastEventError: manager.store.get("settings", "last_event_error"),
   }));
   app.get("/api/tasks", async () => manager.store.tasks());
-  app.post("/api/tasks", async (req) => manager.create(req.body));
+  app.post("/api/tasks", async () => {
+    throw new DomainError(
+      "new_session_disabled",
+      "Register existing sessions with /api/watches. Creating workers or worktrees is not part of Dots supervision.",
+      410,
+    );
+  });
+  app.get("/api/watches", async () => manager.store.watches());
+  app.post("/api/watches", async (req) => observer.create(req.body));
+  app.get<{ Params: { id: string } }>("/api/watches/:id", async (req) => ({
+    watch: manager.store.getWatch(req.params.id),
+    commands: manager.store.commands(req.params.id),
+  }));
+  app.post<{ Params: { id: string; action: string } }>(
+    "/api/watches/:id/:action",
+    async (req) => {
+      switch (req.params.action) {
+        case "poll":
+          return observer.poll(req.params.id);
+        case "pause":
+          return observer.pause(req.params.id);
+        case "release":
+          return observer.pause(req.params.id, true);
+        case "resume":
+          return observer.resume(req.params.id);
+        default:
+          throw new DomainError("not_found", "Unknown watch control", 404);
+      }
+    },
+  );
   app.get<{ Params: { id: string } }>("/api/tasks/:id", async (req) => {
     const task = manager.store.getTask(req.params.id);
-    let currentFingerprint: string | null = null;
+    let current: string | null = null;
     try {
-      if (task.worktree) currentFingerprint = await fingerprint(task.worktree);
+      if (task.worktree) current = await fingerprint(task.worktree);
     } catch {}
     return {
       task,
       commands: manager.store.commands(task.id),
       evidenceValid:
-        currentFingerprint !== null &&
+        current !== null &&
         task.evidence.length === task.checks.length &&
-        task.evidence.every(
-          (e) => e.passed && e.fingerprint === currentFingerprint,
-        ),
-      approvals: manager.store
-        .values<any>("approvals")
-        .filter((a) => a.taskId === task.id && a.state === "pending"),
+        task.evidence.every((e) => e.passed && e.fingerprint === current),
     };
   });
   app.post<{ Params: { id: string; action: string } }>(
     "/api/tasks/:id/:action",
-    async (req) => {
-      const input = (req.body ?? {}) as any;
-      const id = req.params.id;
-      switch (req.params.action) {
-        case "send":
-        case "steer":
-          return manager.dispatch(id, req.params.action, input);
-        case "verify":
-          return manager.verify(id, input);
-        case "complete":
-          return manager.complete(
-            id,
-            commandSchema.parse(input),
-            z.string().min(1).parse(input.report),
-          );
-        case "pause":
-          return manager.pause(
-            id,
-            false,
-            input.reason ?? "Paused by user",
-            input,
-          );
-        case "release":
-          return manager.pause(
-            id,
-            true,
-            input.reason ?? "Released by user",
-            input,
-          );
-        case "resume":
-          return manager.resume(
-            id,
-            input.confirmPreviousWorkerStopped === true,
-          );
-        default:
-          throw new DomainError("not_found", "Unknown action", 404);
-      }
+    async () => {
+      throw new DomainError(
+        "legacy_execution_disabled",
+        "Worker execution is disabled. Use existing-session watch controls.",
+        410,
+      );
     },
   );
-  app.post<{ Params: { id: string } }>("/api/approvals/:id", async (req) => {
-    const input = z.object({ accept: z.boolean() }).parse(req.body);
-    await manager.approve(req.params.id, input.accept);
-    return { ok: true };
+  app.post("/api/approvals/:id", async () => {
+    throw new DomainError(
+      "permission_host_required",
+      "Handle permissions directly in the original host; Dots cannot approve them.",
+      410,
+    );
   });
   app.get("/api/capabilities", async () => manager.capabilities());
   app.get("/api/events", async (req) =>
@@ -201,9 +208,9 @@ export function buildServer(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.0" },
+            serverInfo: { name: "kingdots", version: "0.1.1" },
             instructions:
-              "Read task scope before issuing commands. Only direct user requests authorize work. Unknown delivery requires reconciliation. Provider approval and management resume are user-only controls. Completion needs independent evidence.",
+              "Dots supervises only user-selected existing sessions. No new workers or worktrees. Observe healthy work quietly, refresh original host state before a follow-up, and reconcile unknown delivery. Host permission and management resume are user-only controls. Completion evidence is host-reported; actual unattended Dots wake-up remains unverified.",
           };
           break;
         case "tools/list":

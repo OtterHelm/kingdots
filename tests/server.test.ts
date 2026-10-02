@@ -117,12 +117,17 @@ test("MCP publishes tools and protocol-specific event capabilities with no user 
     assert.deepEqual(discovery.result.supportedVersions, ["2026-07-28"]);
     assert.ok(discovery.result.capabilities.events);
     const listed = await rpc("tools/list");
-    assert.ok(listed.result.tools.some((t: any) => t.name === "task_complete"));
+    assert.ok(listed.result.tools.some((t: any) => t.name === "watch_finish"));
+    assert.ok(
+      !listed.result.tools.some(
+        (t: any) => t.name === "task_create" || t.name === "session_send",
+      ),
+    );
     assert.ok(
       !listed.result.tools.some((t: any) => /approve|resume/.test(t.name)),
     );
     assert.equal((await rpc("events/list")).result.events.length, 2);
-    const call = await rpc("tools/call", { name: "task_list", arguments: {} });
+    const call = await rpc("tools/call", { name: "watch_list", arguments: {} });
     assert.equal(call.result.isError, false);
     assert.equal((await rpc("not-supported")).error.code, -32601);
   } finally {
@@ -130,7 +135,7 @@ test("MCP publishes tools and protocol-specific event capabilities with no user 
     await f.cleanup();
   }
 });
-test("task details flag stale evidence; invalid task creation is rejected with a structured error", async () => {
+test("legacy evidence remains readable while public worker creation is disabled", async () => {
   const f = await fixture();
   const app = buildServer(
     f.manager,
@@ -150,8 +155,8 @@ test("task details flag stale evidence; invalid task creation is rejected with a
       headers: { authorization: "Bearer ui" },
       payload: { goal: "Missing other fields" },
     });
-    assert.equal(invalid.statusCode, 400);
-    assert.equal(invalid.json().code, "invalid_input");
+    assert.equal(invalid.statusCode, 410);
+    assert.equal(invalid.json().code, "new_session_disabled");
   } finally {
     await app.close();
     await f.cleanup();

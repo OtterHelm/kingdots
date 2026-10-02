@@ -1,69 +1,40 @@
-# Verification and current limitations
+# Existing-session verification
 
-## Automated checks
+Run `npm run typecheck`, `npm test` and `npm run build`. Local CI validates the
+package and unchanged source as well. Controlled tests do not call provider models.
 
-`npm test` uses controlled adapters and temporary Git projects. It verifies:
+The observer regressions cover:
 
-- preservation of original files/index and copying dirty/untracked work;
-- failure → scoped follow-up → fresh tests → completion;
-- command deduplication and conflicting IDs;
-- stale/missing evidence, missing artifacts and file-scope violations;
-- repeated failures, immediate write fencing and cancellation;
-- session ownership, unknown delivery and restart recovery;
-- independent task concurrency and optional budget behavior;
-- unavailable usage without fabricated values;
-- UI/MCP role separation and cross-site request rejection;
-- signed callback verification, durable delivery and bounded retries;
-- official MCP SDK initialization, tool discovery and invocation.
-- API-key/unknown authentication refusal, authentication changes between turns;
-- CLI background service start/status/stop.
+- registration/polling/pause without worker creation, external resume, interruption
+  or a new Git worktree;
+- quiet healthy observations and deduplicated attention for questions/errors;
+- immutable observation IDs and replay protection that cannot refresh stale state;
+- active, permission, unknown, stale and user-intervened follow-up fencing;
+- same-session reservations, one-time claims, unknown delivery and host reconciliation;
+- restart cancellation of proven-unsent messages and retention of uncertain sends;
+- final reporting against fresh idle snapshots and each original completion condition;
+- public worker creation/execution disabled and management resume inaccessible to MCP.
 
-`npm run test:live` independently uses the actual installed Codex App Server
-and an isolated fixture. It stores the installed version, task, commands,
-test output, usage when available, cancellation/resume outcome and limitations
-under `.kingdots/live-*/result.json`. Inspect `passed` and the individual
-results; the presence of the file is not a passing assertion.
+The service does not execute completion tests in a new worker or project clone.
+`watch_finish` checks referenced, host-reported evidence and snapshot freshness;
+Dots must inspect the actual original-host tests and artifacts. It is not independent
+verification of file contents, semantic task quality or the authenticity of a
+caller's claimed user request.
 
-This test uses a scripted supervisor. It does **not** verify Dots wake-up.
-The real Dots acceptance test is described in `dots-connection.md` and requires
-a user-configured actual Dots local-computer/plugin connection without API billing.
+`scripts/browser-check.ts` exercises authenticated watch registration, details,
+pause/resume, the Dots status panel and mobile layout with a fictitious session ID.
+It does not connect or control a real coding session.
 
-`npx tsx scripts/local-connection-check.ts` tests official SDK tool calls over
-local stdio without a model invocation or provider API key. It records local
-connectivity separately from the still-unverified actual Dots wake-up.
+`scripts/local-connection-check.ts` checks official MCP SDK initialization, tool
+discovery and read-only capability queries without model calls. Its result does
+not establish actual Dots host access or an unattended wake-up.
 
-## Compatibility boundaries
+Earlier `scripts/live-codex.ts` and worker tests are historical execution experiments.
+They are not the current default product flow or acceptance evidence for supervising
+an external session. `test:live` is excluded from CI and consumes provider usage.
 
-- Windows is the first target. Tests on another OS do not imply support there.
-- Codex App Server is an experimental upstream dependency. Capability evidence
-  is associated with the observed provider version and must be retested after
-  an upgrade. Windows sandbox rejects custom output caps; this adapter uses
-  the native default there and retains the sandbox.
-- Codex chooses the account's `model/list` default unless a supported task
-  model is supplied. It does not edit the user's global model configuration.
-- Claude uses the official SDK and activity hooks. Live steering is disabled
-  in this adapter; send a follow-up after the query finishes. Actual account
-  execution has not been declared verified by installation alone.
-- OpenCode selects v1/v2 clients by installed major version. It reconnects
-  event streams and re-queries owned session status/results. Missed events are
-  recorded as a gap; it does not claim replay from a live-only stream.
-- Desktop application control remains development planned. Code/Chat/Cowork
-  must not be represented as interchangeable products.
-- Strict token caps are refused. Claude's native budget is an estimated-cost
-  budget, not a billing guarantee. Dots task-level usage is unavailable.
-- Completion validates prescribed checks and scope, not the semantic quality
-  of arbitrary tests. Dots must still review whether the evidence meets the goal.
-- Provider sandboxes and user review remain in force. The local API itself is
-  not an OS sandbox; credentials with access to it must remain private. User
-  approval does not install, enable, or change provider/account permissions.
-
-Production unattended support must remain unverified until the complete Dots
-scenario passes. No code in this preview publishes a package, pushes source,
-configures a user account, creates a schedule, or grants provider permissions.
-The explicit `install-plugin` command adds a local Codex plugin using a dedicated
-marketplace. It does not issue account credentials or change billing settings.
-
-The [local CI pipeline](local-ci.md) runs the same gates with a dedicated
-self-hosted Windows runner and retains a commit/file-bound receipt and package
-on the user's computer. `test:live` is not part of automated CI. Actual runner
-connectivity and a successful workflow execution must be verified separately.
+The actual release gate is documented in [Dots connection](dots-connection.md):
+an already-working session, the initial Dots response ending, a question/error,
+same-session follow-up, actual fresh evidence and a final user report without any
+additional user message or newly created session. Until independently observed,
+unattended supervision must remain unverified.

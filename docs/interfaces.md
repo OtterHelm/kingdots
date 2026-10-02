@@ -1,88 +1,84 @@
-# Public interfaces
+# Existing-session observation contract
 
-The package exports domain types, `Store`, `Manager`, `Events`, `buildServer`,
-and the adapter contract. Native provider differences belong inside adapters.
-Provider server messages and repository text never become authorization.
+Dots is the supervisor. The public service registers existing sessions and records
+observations and scoped decisions. It does not create worktrees, start workers,
+resume external processes, approve permissions or supply an external host control API.
 
-## Task lifecycle
+## Watch record
 
-`preparing → running → verifying → awaiting_decision → completed`
+`watch_create` requires `goal`, `sessions`, `completionConditions`, `allowedFollowUp`
+and direct-user `authorization`. Each session has `backend`, `sessionId`, `project`
+and `source` (`dots_host`, the default, or `adapter`). Backend IDs remain `codex-cli`,
+`codex-app`, `claude-code`, `claude-app` and `opencode-cli`; registration does not
+establish support for any of their external control connections.
 
-Errors/permissions/connection changes can enter `awaiting_input`, `failed`,
-`paused`, or `released`. An AI result is not task completion. The initial
-checks and artifacts are immutable for the lifetime of a task. A new scope or
-completion contract needs a new explicitly authorized task in this release.
+`pollIntervalMs` defaults to 30000, `staleAfterMs` to 300000. Each is at least 1000;
+staleness cannot be shorter than polling. A watch retains an ownership `epoch`,
+state, latest per-session snapshots, original scope, last healthy observation,
+instruction history and final host-reported evidence.
 
-Tasks record user-request provenance, selected providers, file scope, baseline
-branch/commit/worktree, optional budgets, session ownership epoch, checklist,
-evidence, reported usage, blockers, recent/next actions, and healthy/decision
-timestamps. Completion evidence binds exit status and output to a file-content
-fingerprint. Required artifacts have independent hashes, including ignored
-build products.
+States: `watching`, `awaiting_decision`, `awaiting_input`, `paused`, `released`,
+`completed`. Idle, unknown, missing and stale observations request Dots's review.
+Normal running observations do not continually emit attention events.
 
-## MCP
+## MCP tools
 
-The authenticated `/mcp` endpoint accepts JSON-RPC; `kingdots mcp` proxies
-JSONL stdio to the same endpoint. The official MCP SDK's HTTP client is covered
-by an integration test. Local UI and MCP tokens are separate. MCP cannot call
-user approval or manual resume routes.
+| Tools                                              | Effect                                                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `watch_create`                                     | Register selected existing sessions without contacting or changing their workers                     |
+| `watch_list`, `watch_get`                          | Read scope, observations and delivery history                                                        |
+| `watch_poll`                                       | Read enrolled adapter metadata and classify missing/stale host observations                          |
+| `watch_observe`                                    | Store official-host evidence reported by Dots, with immutable observation ID                         |
+| `watch_instruction_prepare`                        | Reserve and journal an exact follow-up; nothing is sent                                              |
+| `watch_instruction_claim`                          | Claim one pending instruction before a verified official host send; no host send is implemented here |
+| `watch_instruction_receipt`                        | Persist accepted/not-sent/unknown host results or reconciliation                                     |
+| `watch_pause`, `watch_release`                     | Fence management and leave original sessions running                                                 |
+| `watch_finish`                                     | Record Dots's report against fresh idle snapshots and referenced passing conditions                  |
+| `session_list`, `session_get`, `capabilities_list` | Read provider metadata and actual support boundaries                                                 |
+| `events_read`, `decision_ack`                      | Recover attention events and record Dots's observed decisions                                        |
 
-| Tool                            | Purpose                                                           |
-| ------------------------------- | ----------------------------------------------------------------- |
-| `task_create`                   | Enroll a direct user request, prepare a worktree, start execution |
-| `task_list`, `task_get`         | Read selected tasks, scope, evidence and command history          |
-| `capabilities_list`             | Read independent installed-version feature evidence               |
-| `session_list`, `session_get`   | Read session metadata without resuming                            |
-| `session_attach`                | Attach only an owned inactive session in the same worktree        |
-| `session_send`, `session_steer` | Start a follow-up or guide an active owned turn                   |
-| `task_verify`                   | Run saved checks in a sandbox without a model call                |
-| `task_complete`                 | Validate evidence and save an evidence-based report               |
-| `task_pause`, `task_release`    | Fence new writes and confirm cancellation                         |
-| `session_interrupt`             | Interrupt an owned session and pause its automatic management     |
-| `events_read`, `decision_ack`   | Recover durable events and acknowledge a Dots decision            |
+There are 16 tools. Worker creation, arbitrary command execution, provider approval,
+external session resume and management resume are not exposed through MCP.
 
-Execution requests use `commandId`, `reason`, and the task's current `epoch`.
-The same ID/input returns the recorded operation. Reusing an ID with different
-input is rejected. On uncertain provider acceptance the command is `unknown`;
-it is not dispatched again. A transport request ID alone is not an exactly-once
-guarantee from a provider.
+## Observation and follow-up
 
-MCP Events supports `server/discover`, `events/list`, `events/subscribe`, and
-`events/unsubscribe`. Events contain only task ID, revision, cause, cursor,
-timestamp, and event ID. Retrieve full evidence with `task_get`.
+An observation includes watch/backend/session IDs, `observationId`, state, summary
+and nonempty source evidence references. States are `running`, `idle`, `question`,
+`permission`, `failed`, `unknown`, `user_intervened`. Host records have provenance
+`dots_host_reported`; local metadata has `adapter_metadata`. Replaying the same
+observation ID cannot replace later state or refresh old evidence; changed content
+under that ID is rejected.
 
-## Local HTTP controls
+A prepared instruction includes `commandId`, watch/backend/session IDs, exact prompt,
+reason, current `epoch` and current `observationId`. Only fresh host-reported idle,
+question or failed state is actionable. The caller must stay inside `allowedFollowUp`.
+Permission prompts require the user; a claim is not authorization to bypass them.
 
-All `/api/*` calls require a local UI bearer token, except the MCP tool bridge
-which requires the distinct MCP token. Cross-site origins and unknown hosts
-are rejected. There is no cookie-based authentication.
+Commands move from `queued` (not sent) to `dispatching` (host send required), then
+`completed` with `delivery: accepted`, `failed` with `delivery: not_sent`, or `unknown`.
+Duplicate prepares return the previous record; different input under the same ID
+fails. A second claim fails. The session reservation is held across unknown delivery
+and restarts. Reservations coordinate kingdots clients, not unrelated host processes.
 
-- `GET /api/status`, `/api/tasks`, `/api/tasks/:id`, `/api/capabilities`
-- `POST /api/tasks`
-- `POST /api/tasks/:id/{send,steer,verify,complete,pause,release,resume}`
-- `POST /api/approvals/:id` with a user decision
-- `GET /api/events`, `/api/instructions`
-- `POST /api/shutdown`
+Dots must use an actually available, official host tool to deliver the exact command
+to the same session and retain the host result. If that connection is unavailable,
+the command remains unsent. No fallback session may be created.
 
-The user-only resume route can require explicit confirmation that a previous
-worker stopped. A new adapter must not infer external ownership from stored
-history timestamps. Claude/OpenCode session acquisition after a process
-restart remains restricted because their external writer ownership cannot be
-proved by this adapter.
+`watch_finish` requires the current epoch, final report, latest observation IDs and
+`evidence: [{condition, reference, passed: true}]` covering every initial condition.
+All target snapshots must be fresh and idle; uncertain/pending delivery blocks finish.
+Evidence is host-reported, not independently executed or file-hash-verified by the service.
 
-The standard CLI runtime applies a no-API-billing execution policy. Codex workers
-must use existing ChatGPT authentication. Other backends can expose
-`executionBlockedReason` while their execution authentication remains unverified;
-stored-history discovery and execution capability evidence stay separate.
+## Local API and events
 
-## Adapter requirements
+UI-token endpoints: `GET/POST /api/watches`, `GET /api/watches/:id`, and
+`POST /api/watches/:id/{poll,pause,release,resume}`. Resume is user-only and requires
+reconciling unknown delivery first. It clears old observations for a fresh host read.
+Original sessions are not interrupted. Legacy task creation/execution returns `410`;
+historical task records remain readable.
 
-Implement `probe`, `list`, `read`, `create`, `send`, `steer`, `interrupt`,
-`resume`, `close`, and `onEvent`. Unsupported operations must fail explicitly.
-`executeCheck` is an optional sandbox executor; the manager currently uses
-the Codex implementation for independent checks. An optional `approve`
-callback is reachable only through the user UI controls.
-
-Publish each feature's status, version, platform, test date, evidence and
-limitations separately. Installation is not execution verification. External
-active sessions require a separate ownership protocol before adoption.
+MCP uses its separate token at `/mcp`. Existing event names `task.attention_required`
+and `task.completed` retain `arguments: {taskId: watch.id}` for compatibility. Signed
+callback verification, retry/deduplication and durable event cursors remain available.
+Webhook receipt, an acknowledged decision and real Dots unattended supervision are
+separate observations. None of the first two proves the third.

@@ -1,31 +1,27 @@
-# Delivery roadmap
+# Minimal delivery scope
 
-Implemented foundations: CLI lifecycle, durable task/command/event store,
-worktree isolation, Codex execution and independent sandbox verification,
-provider adapter contracts, MCP, signed webhook outbox, local dashboard,
-user controls and installable plugin/package sources.
+The required product is Dots supervising sessions that the user has already started,
+including while the user is asleep. Dots remains the decision-maker. No new sessions,
+worktrees, worker supervisor or separate judgment model are part of the default flow.
 
-Release gates:
+Implemented local foundation: explicit existing-session registration, read-only
+metadata polling, host observation records, quiet healthy-state monitoring, attention
+events, scoped instruction/receipt journals, duplicate prevention, intervention and
+restart fencing, dashboard controls and plugin packaging.
 
-1. **Connections:** complete real capability tests for each installed provider.
-   Verify Dots's local MCP and wake-up path without API billing on the actual
-   account. Unsupported desktop features remain visibly planned.
-2. **First automatic management:** pass a real Dots small-task flow including
-   an initial response ending, failed verification, repair, fresh verification
-   and final report. A scripted supervisor is insufficient for this gate.
-3. **Other providers:** pass the same ownership, result, interruption and
-   recovery scenarios for Claude Code/OpenCode and any supported desktop APIs.
-4. **Multiple sessions:** extend native provider stress tests for event gaps,
-   process restart, user intervention and independently scoped parallel work.
-   The existing fixed-count-free task manager must retain its safety properties.
-5. **Public distribution:** confirm all claimed capabilities against versioned
-   evidence, review the package/license inventory, and explicitly publish the
-   npm package/source/plugin through supported distribution channels.
+Only the following release work is required:
 
-API billing is prohibited. Native Codex workers enforce ChatGPT authentication;
-other provider execution requires independently verified subscription/local-model
-authentication before enabling. Official tunnel setup is disabled, and its
-runtime key was not issued. No paid fallback is part of this release gate.
+1. Verify actual Dots access to the user's official existing Codex session read and
+   follow-up tools. Establish the real host ownership/control boundary; do not infer
+   it from stored CLI history or a kingdots write reservation.
+2. Verify a supported event or Dots check-in that wakes the actual dot after its
+   initial response ends without an API-key supervisor or another user message.
+3. Run the overnight acceptance on an already-working selected session: healthy
+   observation, scoped question, error/stop, same-session follow-up, fresh test/artifact
+   evidence and final user report. Verify pause/intervention/uncertain delivery.
 
-Accounts, credentials and publication are separate user-operated steps. Do not
-turn a future roadmap item or an AI result into authorization to perform them.
+Until all three pass, overnight supervision remains unverified. Local MCP discovery,
+scripted host fixtures and webhook `2xx` are insufficient. More providers, automatic
+worker launches, merging, deployment and expanded scheduling features are outside
+this correction's scope. Existing experimental adapters are retained without new
+support claims.

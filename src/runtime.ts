@@ -6,6 +6,7 @@ import { Store } from "./store.js";
 import { Vault } from "./vault.js";
 import { Manager } from "./manager.js";
 import { Events } from "./events.js";
+import { Observer } from "./watch.js";
 import { CodexAdapter } from "./adapters/codex.js";
 import { ClaudeAdapter } from "./adapters/claude.js";
 import { OpenCodeAdapter } from "./adapters/opencode.js";
@@ -38,14 +39,17 @@ export async function runtime(dataDir = defaultDataDir()) {
       : "API billing is forbidden. Execution is disabled until a subscription or local model connection is independently verified; stored session reading remains available.",
   );
   const events = new Events(store, vault);
+  const observer = new Observer(store, adapters);
   return {
     dataDir,
     vault,
     store,
     manager,
     events,
+    observer,
     async close() {
       events.stop();
+      await observer.close();
       await manager.close();
       store.close();
     },

@@ -4,6 +4,7 @@ import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Task, Command, EventRecord } from "./domain.js";
 import { DomainError } from "./domain.js";
+import type { Watch } from "./watch.js";
 
 export class Store {
   readonly db: DatabaseSync;
@@ -13,6 +14,7 @@ export class Store {
     this.db
       .exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, body TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS watches (id TEXT PRIMARY KEY, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS commands (id TEXT PRIMARY KEY, task_id TEXT NOT NULL, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS leases (session_key TEXT PRIMARY KEY, task_id TEXT NOT NULL, epoch INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS events (cursor INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, body TEXT NOT NULL);
@@ -39,6 +41,27 @@ export class Store {
         "INSERT INTO tasks VALUES (?,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body",
       )
       .run(task.id, JSON.stringify(task));
+  }
+  saveWatch(watch: Watch) {
+    this.db
+      .prepare(
+        "INSERT INTO watches VALUES (?,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body",
+      )
+      .run(watch.id, JSON.stringify(watch));
+  }
+  getWatch(id: string): Watch {
+    const row = this.db
+      .prepare("SELECT body FROM watches WHERE id=?")
+      .get(id) as { body: string } | undefined;
+    if (!row) throw new DomainError("not_found", "Watch not found", 404);
+    return JSON.parse(row.body);
+  }
+  watches(): Watch[] {
+    return (
+      this.db.prepare("SELECT body FROM watches ORDER BY rowid DESC").all() as {
+        body: string;
+      }[]
+    ).map((r) => JSON.parse(r.body));
   }
   getTask(id: string): Task {
     const row = this.db.prepare("SELECT body FROM tasks WHERE id=?").get(id) as
@@ -87,7 +110,10 @@ export class Store {
   release(taskId: string) {
     this.db.prepare("DELETE FROM leases WHERE task_id=?").run(taskId);
   }
-  event(task: Task, cause: string): EventRecord {
+  event(
+    task: { id: string; state: string; revision: number },
+    cause: string,
+  ): EventRecord {
     const event: EventRecord = {
       id: randomUUID(),
       name:

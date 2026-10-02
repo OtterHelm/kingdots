@@ -128,6 +128,7 @@ async function serve() {
         onShutdown: () => {
           void close();
         },
+        observer: rt.observer,
       },
     );
     const url = await app.listen({

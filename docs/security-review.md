@@ -1,5 +1,12 @@
 # Security and publication review
 
+This records the 0.1.0 source/publication review. Version 0.1.1 changes the public
+workflow to existing-session observation: worker creation/execution is disabled,
+permission decisions remain in the original host, and completion evidence is
+explicitly host-reported. Its added regressions cover observation replays, one-time
+instruction claims, uncertain delivery, intervention and restart fencing. These
+checks do not verify the actual Dots wake-up or external host control connection.
+
 Reviewed on **2026-10-02**. This is a scoped source review, regression verification,
 dependency advisory check, and publication scan. It is not an independent penetration
 test or a guarantee that the preview has no vulnerabilities.

@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { resolve } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
-const client = new Client({ name: "kingdots-local-check", version: "0.1.0" });
+const client = new Client({ name: "kingdots-local-check", version: "0.1.1" });
 try {
   await client.connect(
     new StdioClientTransport({
