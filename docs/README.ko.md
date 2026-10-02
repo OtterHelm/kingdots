@@ -338,11 +338,13 @@ npm pack
 
 기본 `npm test`는 통제된 어댑터와 임시 Git 프로젝트를 사용하며 제공자 모델을 호출하지 않습니다. Windows CI에서 타입 검사·테스트·빌드·패키지 구성을 확인합니다.
 
+개인정보·비밀값 검사, 의존성 취약점 점검, 수정한 문제와 남은 보안 경계는 [보안·공개 점검 기록](security-review.md)에 정리했습니다.
+
 ### 로컬 CICD
 
-사용자의 기존 HUNTBAND 로컬 CI 운영 방식에 맞춰 같은 PC에 kingdots 전용
-`kingdots-local-win-x64` runner를 연결했습니다. 기존 HUNTBAND runner는 그대로
-유지하며 `self-hosted / Windows / X64 / kingdots` labels로 실행 환경을 선택합니다.
+로컬 Windows PC에 kingdots 전용 `kingdots-local-win-x64` runner를 연결했습니다.
+다른 저장소의 runner와 독립적으로 등록하고 예약 작업을 사용하며
+`self-hosted / Windows / X64 / kingdots` labels로 실행 환경을 선택합니다.
 
 `main` push 또는 `main`에서의 수동 실행은 **한 개의 로컬 Windows job**에서
 의존성 설치 → 타입 검사 → 테스트 → 빌드 → 패키지 검증을 수행합니다.

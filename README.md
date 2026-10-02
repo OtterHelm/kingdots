@@ -339,9 +339,11 @@ npm pack
 
 The standard `npm test` uses controlled adapters and temporary Git projects without calling provider models. Windows CI checks types, tests, builds, and package contents.
 
+See the [security and publication review](docs/security-review.md) for the privacy scan, dependency audit, corrected issues, and remaining security boundaries.
+
 ### Local CI/CD
 
-A dedicated `kingdots-local-win-x64` runner is connected on the same computer as the owner's existing HUNTBAND local CI. The HUNTBAND runner is retained. Jobs select `self-hosted / Windows / X64 / kingdots` labels.
+A dedicated `kingdots-local-win-x64` runner is connected on a local Windows computer. It has its own registration and scheduled task, independent of any other repository's runners. Jobs select `self-hosted / Windows / X64 / kingdots` labels.
 
 A `main` push or manual dispatch on `main` runs dependency installation, type checking, tests, builds, and package validation in **one local Windows job**. There is no automatic fallback to GitHub-hosted execution or GitHub cache storage. PR triggers are excluded from this workflow to avoid automatically executing external PR code on a personal computer; external fork workflows require approval.
 

@@ -36,6 +36,43 @@ test("UI and MCP credentials have separate roles; host and origin checks prevent
       ).statusCode,
       403,
     );
+    for (const host of [
+      "[::2]:7435",
+      "[::ffff:8.8.8.8]:7435",
+      "[:::garbage]:7435",
+      "localhost:invalid",
+      "localhost:65536",
+      "localhost:0",
+      "localhost:7435@attacker.example",
+    ]) {
+      assert.equal(
+        (
+          await app.inject({
+            url: "/api/tasks",
+            headers: { host, authorization: "Bearer ui-secret" },
+          })
+        ).statusCode,
+        403,
+        host,
+      );
+    }
+    for (const host of ["127.0.0.1:7435", "localhost:7435", "[::1]:7435"]) {
+      assert.equal(
+        (
+          await app.inject({
+            url: "/api/tasks",
+            headers: { host, authorization: "Bearer ui-secret" },
+          })
+        ).statusCode,
+        200,
+        host,
+      );
+      assert.equal(
+        (await app.inject({ url: "/api/tasks", headers: { host } })).statusCode,
+        401,
+        host,
+      );
+    }
     assert.equal(
       (
         await app.inject({

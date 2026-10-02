@@ -24,8 +24,15 @@ export function buildServer(
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
   const registry = tools(manager, events);
   app.addHook("onRequest", async (req, reply) => {
-    const hostname = (req.headers.host ?? "").split(":")[0].toLowerCase();
-    if (!["127.0.0.1", "localhost", "["].includes(hostname))
+    const authority =
+      /^(?:127\.0\.0\.1|localhost|\[::1\])(?::([0-9]{1,5}))?$/i.exec(
+        req.headers.host ?? "",
+      );
+    if (
+      !authority ||
+      (authority[1] !== undefined &&
+        (Number(authority[1]) < 1 || Number(authority[1]) > 65535))
+    )
       return reply.code(403).send({ error: "Untrusted Host header" });
     const origin = req.headers.origin;
     if (origin) {

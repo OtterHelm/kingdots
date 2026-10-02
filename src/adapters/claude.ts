@@ -26,6 +26,7 @@ export class ClaudeAdapter implements Adapter {
     { project: string; started: boolean; query?: Query; stopping?: boolean }
   >();
   private approvals = new Map<string, (value: PermissionResult) => void>();
+  constructor(private startQuery: typeof query = query) {}
   async probe(): Promise<BackendInfo> {
     const info: BackendInfo = {
       id: this.id,
@@ -117,7 +118,7 @@ export class ClaudeAdapter implements Adapter {
         "A Claude query is already running",
       );
     const controller = new AbortController();
-    const q = query({
+    const q = this.startQuery({
       prompt,
       options: {
         cwd: task.worktree!,
@@ -165,11 +166,8 @@ export class ClaudeAdapter implements Adapter {
               message: "Path is outside the authorized worktree or file scope",
             };
           }
-          if (
-            tool === "Bash" &&
-            task.checks.some((c) => c.argv.join(" ") === input.command)
-          )
-            return { behavior: "allow", updatedInput: input };
+          // Bash accepts shell syntax. Joining an authorized argv array does not
+          // authorize its shell interpretation; retain the explicit approval flow.
           if (
             !task.scope.allowNetwork &&
             ["WebFetch", "WebSearch"].includes(tool)
@@ -241,11 +239,6 @@ export class ClaudeAdapter implements Adapter {
                       };
                     return {};
                   }
-                  if (
-                    tool === "Bash" &&
-                    task.checks.some((c) => c.argv.join(" ") === value.command)
-                  )
-                    return {};
                   return {
                     hookSpecificOutput: {
                       hookEventName: "PreToolUse" as const,

@@ -1,8 +1,8 @@
 # 로컬 CI/CD
 
-kingdots는 사용자의 기존 HUNTBAND 로컬 CI 운영 방식에 맞춰 **자기 PC의 Windows GitHub Actions runner 한 개**에서 검증과 패키지 생성을 실행합니다. GitHub-hosted runner나 GitHub cache 저장소를 사용하지 않습니다.
+kingdots는 **로컬 PC의 Windows GitHub Actions runner 한 개**에서 검증과 패키지 생성을 실행합니다. GitHub-hosted runner나 GitHub cache 저장소를 사용하지 않습니다.
 
-기존 `huntband-local-win-x64`는 HUNTBAND 저장소 전용이므로, 그 등록·예약 작업·검증 워크플로를 바꾸지 않고 같은 PC에 kingdots 전용 runner를 추가했습니다. 기존 portable PowerShell 7 운영 방식을 사용하고 Node.js 24와 npm은 PC에 설치된 실행 환경을 사용합니다.
+kingdots 전용 runner는 다른 저장소의 runner와 별도로 등록하고 예약 작업을 사용합니다. portable PowerShell 7과 PC에 설치된 Node.js 24·npm을 실행 환경으로 사용합니다.
 
 ## 현재 연결
 
@@ -89,7 +89,7 @@ gh api repos/OtterHelm/kingdots/actions/runners --jq '.runners[] | {name, status
 gh run list --repo OtterHelm/kingdots --workflow checks.yml
 ```
 
-runner가 연결되어도 실제 job 실행 성공과 같지 않습니다. 성공 근거는 해당 커밋의 GitHub run과 로컬 receipt로 확인합니다. 실행 중 중단하면 검사나 패키지가 완성되지 않을 수 있으므로 다음 실행에서 새 근거를 확인합니다. HUNTBAND 예약 작업과 runner는 별도 관리합니다.
+runner가 연결되어도 실제 job 실행 성공과 같지 않습니다. 성공 근거는 해당 커밋의 GitHub run과 로컬 receipt로 확인합니다. 실행 중 중단하면 검사나 패키지가 완성되지 않을 수 있으므로 다음 실행에서 새 근거를 확인합니다. 다른 저장소의 예약 작업과 runner는 별도 관리합니다.
 
 runner 진단 로그는 `C:\actions-runner-kingdots\_diag`에 있습니다. 인증 파일·원본 로그를 공개 저장소에 올리지 마세요. 결과 보관 폴더의 용량 관리는 소유자가 별도로 수행하며 파이프라인은 과거 결과를 자동 삭제하지 않습니다.
 
