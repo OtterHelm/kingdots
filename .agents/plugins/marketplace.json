@@ -1,0 +1,12 @@
+{
+  "name": "kingdots-local",
+  "interface": { "displayName": "DotsKing local" },
+  "plugins": [
+    {
+      "name": "kingdots",
+      "source": { "source": "local", "path": "./plugins/kingdots" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+web-dist/
+.kingdots/
+*.tgz
+*.log
+coverage/
+.env*
+!.env.example
+secrets.bin
+kingdots.sqlite*
+instance.json
+service.lock
+worktrees/
+plugin-marketplace/

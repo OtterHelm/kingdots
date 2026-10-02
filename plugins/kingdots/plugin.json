@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kingdots",
+  "version": "0.1.0",
+  "description": "Manage user-selected coding tasks through DotsKing with independently verified completion evidence.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/OtterHelm/kingdots",
+  "extensions": { "com.openai": { "interface": { "displayName": "DotsKing", "shortDescription": "Manage local AI work and verification" } } }
+}
