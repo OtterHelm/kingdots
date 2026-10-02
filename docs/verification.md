@@ -62,3 +62,8 @@ scenario passes. No code in this preview publishes a package, pushes source,
 configures a user account, creates a schedule, or grants provider permissions.
 The explicit `install-plugin` command adds a local Codex plugin using a dedicated
 marketplace. It does not issue account credentials or change billing settings.
+
+The [local CI pipeline](local-ci.md) runs the same gates with a dedicated
+self-hosted Windows runner and retains a commit/file-bound receipt and package
+on the user's computer. `test:live` is not part of automated CI. Actual runner
+connectivity and a successful workflow execution must be verified separately.

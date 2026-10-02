@@ -22,6 +22,7 @@
 - [완료 근거와 자동 관리 규칙](#완료-근거와-자동-관리-규칙)
 - [데이터·인증·사용량](#데이터인증사용량)
 - [검증과 개발](#검증과-개발)
+- [로컬 CICD](#로컬-cicd)
 - [문제 해결](#문제-해결)
 - [개발 단계와 기여](#개발-단계와-기여)
 - [라이선스](#라이선스)
@@ -333,6 +334,29 @@ npm pack
 
 기본 `npm test`는 통제된 어댑터와 임시 Git 프로젝트를 사용하며 제공자 모델을 호출하지 않습니다. Windows CI에서 타입 검사·테스트·빌드·패키지 구성을 확인합니다.
 
+### 로컬 CICD
+
+사용자의 기존 HUNTBAND 로컬 CI 운영 방식에 맞춰 같은 PC에 kingdots 전용
+`kingdots-local-win-x64` runner를 연결했습니다. 기존 HUNTBAND runner는 그대로
+유지하며 `self-hosted / Windows / X64 / kingdots` labels로 실행 환경을 선택합니다.
+
+`main` push 또는 `main`에서의 수동 실행은 **한 개의 로컬 Windows job**에서
+의존성 설치 → 타입 검사 → 테스트 → 빌드 → 패키지 검증을 수행합니다.
+GitHub-hosted 실행이나 GitHub cache 저장소로 자동 전환하지 않습니다.
+외부 PR을 개인 PC에서 자동 실행하지 않도록 현재 workflow의 PR 트리거를
+제외하고 외부 기여자의 fork 실행에는 승인을 요구합니다.
+
+```powershell
+.\scripts\ci.ps1
+```
+
+검사한 tarball과 커밋·파일 상태·단계별 종료 코드·패키지 SHA256을 로컬에
+보관합니다. CD의 현재 범위는 검증한 패키지 보관이며 서비스 자동 교체나
+외부 배포는 별도로 구현하지 않았습니다. 실제 AI 작업을 수행하는
+`test:live`도 자동 CI에 넣지 않습니다.
+
+runner·예약 작업·보관 경로·재현 방법은 [로컬 CI/CD 문서](docs/local-ci.md)에 있습니다.
+
 ### 로컬 MCP 연결 검사
 
 ```powershell
@@ -410,6 +434,7 @@ docs/                   인터페이스·연결·검증·개발 단계
 - [검증 범위와 알려진 제약](docs/verification.md)
 - [개발 중 검증 결과](docs/verification-results.md)
 - [후속 개발 단계](docs/roadmap.md)
+- [로컬 CI/CD와 패키지 보관](docs/local-ci.md)
 
 연결 기준 문서: [Codex App Server](https://learn.chatgpt.com/docs/app-server), [Dots 컴퓨터·앱 연결](https://learn.chatgpt.com/docs/dots/computers-and-apps), [Claude 프로그램 실행](https://code.claude.com/docs/en/headless), [Claude Desktop](https://code.claude.com/docs/en/desktop), [OpenCode client](https://opencode.ai/v2/docs/build/client/), [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels), [MCP Events](https://developers.openai.com/plugins/build/mcp-events).
 

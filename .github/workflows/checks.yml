@@ -1,16 +1,30 @@
 name: Checks
-on: [push, pull_request]
+
+# Run only trusted main code on the user's computer. Fork PRs are never
+# checked out by this workflow; the repository also requires fork approval.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kingdots-checks-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   windows:
-    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64, kingdots]
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, Node 24
         with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
-      - run: npm pack --ignore-scripts
+          persist-credentials: false
+      - name: Local verification and package
+        shell: pwsh
+        run: |
+          $artifacts = Join-Path $env:LOCALAPPDATA 'DotsKingCI\artifacts'
+          .\scripts\ci.ps1 -ArtifactDirectory $artifacts
