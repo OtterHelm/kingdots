@@ -107,15 +107,16 @@ and account-linking evidence; no new external connection is authorized by this p
 | 1. Identify and read            | Match the selected existing Codex conversation and actual Dots conversation to their real hosts; try the eligible native Dots route                                      | Correct IDs/project, recent known content, current state, concrete host errors if rejected                                       |
 | 2. Background context           | Let the source response finish naturally; use only the finite read-only program to re-read both conversations                                                            | Source turn completed with final response, successful later reads or a recorded context/lifecycle failure                        |
 | 3. Same-session round trip      | Send the previously authorized file-free test once to the selected idle Codex conversation, through the chosen verified route                                            | Host send receipt, original conversation ID retained, expected response in that conversation, no new conversation or file change |
-| 4. Actual Dots wake-up          | Let Dots's initial response end; then send one relevant attention event/message or use a supported one-time check-in, with no further human message                      | Initial Dots turn ended, later actual Dots decision, same-session delivery and target response with correlated timestamps        |
+| 4. Actual Dots wake-up          | Let Dots finish its user-visible initial reply; then send one relevant attention event/message or use a supported one-time check-in, with no further human message       | Initial reply delivered, later actual Dots decision, same-session delivery and target response with correlated timestamps        |
 | 5. Ordinary question and repair | In one selected existing development task, reproduce an ordinary question, a recoverable failure and failed verification; have Dots guide correction and re-verification | Dots's actual decisions, original session continuity, fresh commands/exit codes/logs/artifacts and final report                  |
 | 6. Intervention and recovery    | Test pause, manual user input, uncertain send receipt, disconnected host and safe same-ID resumption after confirmed exit                                                | No stale/new automatic writes after intervention, no blind retry, explicit unknown delivery and preserved evidence               |
 | 7. Overnight use                | Observe the selected real Codex work without the user supplying follow-ups; subsequently add the other requested programs                                                | Actual overnight trace, measured response delay, completion evidence and explicit feature limits for every target                |
 
 Gates 1–4 establish connectivity and continuation. A marker reply alone cannot
-pass the question/repair or overnight gates. A fixture pass, webhook `2xx`, long
-sleep inside an unfinished model turn, or a different supervising AI cannot
-establish that actual Dots resumed after its initial response.
+pass the question/repair or overnight gates. A fixture pass, webhook `2xx`, or a long sleep alone cannot establish a later
+actual Dots decision. Verify the subsequent observation, guidance and user-facing
+report. A different supervising AI cannot substitute for actual Dots. Internal
+turn IDs need not change if the supported Dots runtime continues assigned work.
 
 Do not implement broader dashboards, provider execution or public deployment
 before the connection gates have evidence. Failed gates produce a minimal
