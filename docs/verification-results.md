@@ -29,7 +29,7 @@ through an automated return channel.
 | Coding-session instructions from these probes               | None; no new conversation, model API key, tunnel or account/billing change                                                                                                     |
 | Usage                                                       | No model call in the local collection/relay program; actual Dots product usage was unavailable, not zero                                                                       |
 
-A finite background trial has been prepared for the next gate: observe the source
+A finite background trial was prepared for the next gate: observe the source
 Codex response end, re-read the original conversation, then ask actual Dots to
 deliver the previously authorized file-free marker once through its own official
 existing-task tool if its authorization and target checks permit it. Match the
@@ -37,11 +37,39 @@ original target, host-provided sender provenance, correlation value, actual repl
 and file fingerprint. New or unverifiable input stops the local trial; unknown
 delivery is held without retry. A sent attention message cannot be atomically
 recalled or reserve the target, so this is a bounded experiment, not production
-intervention safety. Its post-response result remains **pending**.
+intervention safety. Its result is recorded below.
 
 The local plugin remains 0.1.2. This diagnostic has not added a supported service
 command, exposed an endpoint or passed overnight acceptance. Private identities,
 messages and receipts remain in ignored local storage.
+
+### Finite post-response trial result: 0.1.2
+
+The model-free program observed the original Codex response complete and its
+final answer, then successfully read that same existing local conversation and
+the selected Dots engine metadata. It sent one correlated attention request to
+the existing actual Dots conversation after the source response ended; the native
+host returned an accepted receipt. No further human message was needed for those
+reads and that dispatch.
+
+For the next five minutes, the program did **not** verify correlated guidance from
+Dots in the original coding conversation or the expected marker response. The
+recorded result is `guidance_or_marker_not_verified_within_five_minutes`. It sent
+one local result notice to the same existing Dots conversation and received a
+native receipt. It did not retry an instruction, create a conversation or change
+credentials or account settings.
+
+This passes **one finite post-response read/attention trial**, not safe guidance,
+an automated decision-return channel, service restart continuity, the five-minute
+intervention objective or overnight supervision. The local record does not reveal
+whether Dots attempted its own follow-up tool or declined it; do not infer a
+permission denial, permanent incompatibility or successful target delivery from
+that absence. No target reply was verified, so a post-reply file comparison was
+not completed either.
+
+A subsequent local `status` check reported the service offline. That is a runtime
+observation, not a failure of the earlier completed diagnostic; continuous
+supervision is not currently established.
 
 ## Earlier planning relay check: 2026-10-03
 

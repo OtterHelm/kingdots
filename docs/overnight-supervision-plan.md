@@ -10,6 +10,13 @@ observes their context, answers ordinary questions within the original scope,
 guides recoverable failures, checks completion evidence and reports the outcome.
 kingdots collects, relays and journals; it does not provide a judgment model.
 
+Dots initiates observation of the selected sessions; coding AIs are not asked to
+write status reports or send their own supervision requests. The local program
+collects existing host state, conversation, activity, errors and verification
+records without a model call. Dots judges when intervention is needed and guides
+the original sessions. A dashboard and information delivery are intermediate
+milestones, not acceptance of the user's proactive supervision requirement.
+
 | Decision             | Agreed scope                                                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Current test target  | Existing Windows Codex app conversation                                                                                                                |
@@ -42,9 +49,11 @@ remain blocked for the user while other eligible sessions continue.
 - Dots's earlier native PC probe established a connected, authorized computer,
   but did not establish existing-task control. The earlier cloud read failed with
   `unsupported placement format version 2`; its underlying cause remains unknown.
-- The first finite read-only diagnostic expired before the source response ended;
-  it did not test post-response context. A new finite trial is prepared to start
-  immediately before the source reply ends. Private receipts stay in ignored storage.
+- The first finite read-only diagnostic expired before the source response ended.
+  A subsequent finite trial observed completion, re-read the original local Codex
+  conversation and Dots metadata, and received an accepted Dots attention receipt
+  after the source reply ended. It did not verify same-session guidance or a
+  marker reply within five minutes. Private receipts stay in ignored storage.
 
 The relay requires genuine executor-provided context and depends on the installed
 app-tool version. It is not established as a stable standalone background-service

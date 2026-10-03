@@ -17,8 +17,17 @@ Actual Dots compatibility and live idle-session sending remain unverified.
 Bounded native app messages now have actual Dots receipt and user-facing reply
 evidence. The read/wait return path omits those replies. The next connectivity
 trial is Dots's own existing-task follow-up tool against the selected local Codex
-conversation, after the source response has ended; its local-target compatibility
-and background lifecycle remain unverified. See [dated results](verification-results.md).
+conversation. One finite program passed post-response reads and attention
+dispatch, but did not verify correlated guidance and a marker reply within five
+minutes. Local-target sending and sustained/restarted background operation remain
+unverified. See [dated results](verification-results.md).
+
+Proactive observation remains the user's requirement: Dots starts looking at the
+selected existing sessions using automatically collected host records. Coding
+AIs must not spend tokens composing status reports. A reliable dashboard and Dots
+information delivery can be intermediate milestones, but they do not replace
+the required actual Dots management loop. Narrow the first real trial to Codex
+app before expanding providers or the interface.
 
 Only the following release work is required:
 

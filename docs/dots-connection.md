@@ -42,6 +42,12 @@ existing-cloud-task follow-up tool; acceptance of an existing local Codex target
 still needs independent verification. This diagnostic is not a supported CLI or
 plugin connection mode, and the installed plugin does not activate it.
 
+One finite program also re-read the original Codex conversation and Dots metadata
+and dispatched attention after the source response ended. It did not verify a
+correlated same-session instruction and marker reply within its five-minute
+window. Background read/notification evidence does not establish unattended
+control, a stable standalone host contract or recovery after app/service restart.
+
 See the [validation plan](overnight-supervision-plan.md) and
 [dated results](verification-results.md) for the background, same-session,
 authorization, intervention and overnight gates.
