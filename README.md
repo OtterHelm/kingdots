@@ -58,7 +58,7 @@ node dist/cli.js start
 node dist/cli.js open
 ```
 
-The service runs under the current user's permissions on an available 127.0.0.1 port. Open launches the authenticated dashboard, which currently uses Korean labels.
+Each user installs and runs kingdots on their own PC with the prerequisites above. The service uses the permissions of the OS account that launched it. It binds to `127.0.0.1` (localhost, that PC itself) and chooses an available port. `open` launches that installation's authenticated dashboard, which currently uses Korean labels.
 
 For app_host, start the service from an existing Codex chat's executor to inherit genuine app context. A running service keeps its original environment. Inspect status.appHost; available checks prerequisites, not a successful read. See [deployment](docs/deployment.md).
 

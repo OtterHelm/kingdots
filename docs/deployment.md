@@ -15,6 +15,15 @@ is opened from Codex later. Check status.appHost and an actual selected-session 
 
 ## Local service
 
+Each user installs the service on their own PC and uses their own data directory,
+sessions and connection configuration. "Current user" means the OS account that
+starts the process, not the maintainer's account. `127.0.0.1` is localhost on each
+PC, not a centrally hosted address or a port number. The service binds to that
+address and selects an available port. The private relay also requires that user's
+own authorized deployment/account configuration; the source ships no maintainer
+relay endpoint, private account ID or credential. OS support remains limited to the prerequisites
+above; open-source licensing does not establish compatibility with every OS.
+
 One user-owned background Node process serves the API/dashboard and retrieves
 pending Dots requests through outbound HTTPS. It uses windowsHide and normal user
 permissions. There is no second PC OAuth listener, standalone device probe,
