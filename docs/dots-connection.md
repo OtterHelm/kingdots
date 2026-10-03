@@ -39,6 +39,14 @@ Use the [probe source and reproduction instructions](../experiments/dots-pull-re
 The installed 18-tool local plugin is unchanged by connecting this separate
 two-tool private plugin. No automatic management claim follows from deployment.
 
+For the private plugin, check ChatGPT → Plugins → Personal → Created by you.
+Install the provisioned plugin and connect its linked app. Confirm both its
+presence in the installed list and the linked app's connected-account state.
+Generic plugin search/dependency/permission results may not resolve this private
+provisioned plugin; they must not override a confirmed connected UI. Then assign
+the bounded inspection directly to the existing Dot and verify its actual tool
+calls. Installation alone is not proof that Dots exposes or invokes the tools.
+
 ## Local setup
 
 1. Build the checkout, start the local service and run `kingdots install-plugin`

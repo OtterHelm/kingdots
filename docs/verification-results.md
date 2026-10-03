@@ -7,6 +7,24 @@ local storage; public documentation contains no account IDs or callback secrets.
 
 ## Request-driven private relay probe: 2026-10-03
 
+### Installation follow-up: service/plugin 0.1.3, public base `4100ae9`
+
+After the user reported installation, the actual ChatGPT interface showed the
+private probe in its installed-plugin list and its linked app connected to the
+user's account. The generic permission query still reported `not_installed`, and
+dependency lookup rejected the private reference as not a public global listed
+plugin. Those generic responses are not reliable installation evidence for this
+private provisioned plugin; the connected UI is the current confirmed state.
+
+The finite outbound PC transport was restarted after its earlier 30-minute
+expiry. The existing watch remained paused. At this check, its journal contained
+no inspection or returned review. The human was asked to assign the bounded
+read/no-action test directly to the existing Dot. No worker-originated message,
+coding instruction, new session or model API call was performed. Actual Dots
+tool exposure, judgment return and post-response supervision remain unverified.
+
+### Deployment and transport checks
+
 The experiment was prepared against local service/plugin **0.1.3** at repository
 base `2cb7915`. Its separate private Site source commit was `ae61a9f`. The public
 probe working tree contains the same relay protocol and a portable fixture path.
