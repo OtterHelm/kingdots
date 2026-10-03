@@ -15,7 +15,8 @@ logs remain outside Git and the distributed package.
 | Dependency advisories | Root and relay audits both report zero known advisories; relay schema generation passes unchanged | One esbuild development-tool advisory fixed; not an independent vulnerability audit |
 | Credential/publication scan | Gitleaks 8.30.1 found no signature leak in 22 reachable commits, proposed source and 22 Actions logs | Available known vault/auth/context values also compared locally; unknown values are not ruled out |
 | Source/history/package privacy | No known private values in 78 source files, 306 unique history blobs or the 92-member package | Synthetic fixture email candidates were reviewed separately |
-| Public Actions log privacy | 21 logs contained PC/account/home-path identifiers; owner-approved deletion completed for all 21, with run records and local backups retained | No known credential or Codex session/pipe value matched; fresh-job masking verification follows separately |
+| Public Actions log privacy | 21 logs contained PC/account/home-path identifiers; owner-approved deletion completed for all 21, with run records and local backups retained; subsequent downloads are unavailable for all 21 | No known credential or Codex session/pipe value matched; deleting logs does not erase copies previously downloaded by others |
+| Fresh Windows CI and masking | [Run 37145023300](https://github.com/OtterHelm/kingdots/actions/runs/37145023300) on `d2d73a444667e35b8496383ee090e9b7888e1680` succeeded with 46 + 6 tests and both dependency audits clean; actual job-setup and later logs contain masked markers and no original runner identifiers | Job executed, not skipped; three encrypted masking values and privacy-ready gate are configured |
 | Installed service upgrade | Version 0.1.5 rejects unauthenticated encoded API and MCP requests with 401; original watch JSON unchanged and still paused | Three prior returned judgments remain historical; no session instruction executed |
 | Private relay upgrade | Matching committed source/artifact deployed successfully with MCP enabled | Same private audience and existing tools; no new Dots trial |
 
@@ -23,6 +24,14 @@ Root causes, fixes, remaining boundaries and permanent prevention rules are in
 [security review](security-review.md) and
 [AGENTS.md](https://github.com/OtterHelm/kingdots/blob/main/AGENTS.md). Recording
 these results does not enable automatic management or restart paused work.
+
+After publishing the security commit, Gitleaks scanned all 23 then-reachable
+commits, exported source, decompressed package and the fresh public CI log with
+no credential-signature findings. A separate local comparison of 27 available
+credential/context variants found no matches in 78 source files, 332 history
+blobs, the package or that new log. These comparisons include actual local vault
+and Codex authentication values without printing or uploading them. The preserved
+old-log backups remain private evidence of the remediated exposure.
 
 ## 2026-10-04 — 0.1.4 consolidation and prototype removal
 

@@ -37,7 +37,9 @@ logs. It is a scoped review, not an independent penetration test.
    PC name, Windows account name and home path. No known key/token, Codex session
    ID or app pipe matched in those logs. The owner approved deletion of those
    public logs and encrypted repository masking values, with local backups and
-   run results preserved. Actual cleanup and new-job masking results are recorded
+   run results preserved. All 21 deleted logs were unavailable on recheck. A new
+   Windows CI run passed and its setup/later logs contained no original runner
+   identifiers or known credentials/context values. Detailed results are recorded
    in [verification results](verification-results.md). A privacy-ready variable
    gates self-hosted jobs so an unconfigured runner does not emit new metadata.
    Masks must be present before job setup; a later step cannot erase earlier logs.
@@ -60,6 +62,11 @@ logs. It is a scoped review, not an independent penetration test.
 - The inspected Windows database/vault ACLs had no allow rule for Everyone,
   built-in Users or Authenticated Users. This is evidence for that installation,
   not every custom data directory.
+
+The post-fix publication checkpoint at `d2d73a4` extended the scans to 23
+reachable commits, 332 history blobs, the decompressed package and a fresh public
+CI log. No credential signatures or known private comparison values matched.
+Deleting exposed logs cannot recall copies already downloaded by other people.
 
 ### Remaining boundaries
 
