@@ -1,5 +1,11 @@
 # Overnight supervision validation plan
 
+The current connection-gate experiment is the request-driven private relay in
+`experiments/dots-pull-relay`: Dots asks to read, the PC polls outward, and Dots
+returns a correlated no-action review. It adds no worker reporting or public PC
+tunnel. Its deployment/transport proof does not replace actual Dots tool activity
+or post-response acceptance. No instruction/approval tool is exposed in this probe.
+
 Decision date: **2026-10-03 (Asia/Seoul)**. This is a validation and delivery plan,
 not a claim that unattended supervision already works.
 

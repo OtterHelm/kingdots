@@ -5,6 +5,32 @@ performed on 2026-10-02. Results describe the tested installation or working tre
 not universal support. Raw account, session and machine records stay in ignored
 local storage; public documentation contains no account IDs or callback secrets.
 
+## Request-driven private relay probe: 2026-10-03
+
+The experiment was prepared against local service/plugin **0.1.3** at repository
+base `2cb7915`. Its separate private Site source commit was `ae61a9f`. The public
+probe working tree contains the same relay protocol and a portable fixture path.
+
+| Check | Observed result |
+| ----- | --------------- |
+| Controlled relay fixtures | 5/5 passed: bounded discovery, read/result/review correlation, owner/target isolation, expiry, concurrent request reservation |
+| Artifact | ESM default `fetch` validation passed; generated D1 migrations packaged |
+| Native private publish | Succeeded with MCP enabled; access policy contained one owner and no external visitors |
+| Unauthenticated device request | HTTP 401 |
+| Provisioned service credential plus device pairing | HTTP 200 from the device endpoint |
+| Service credential without pairing token | HTTP 401 |
+| Finite PC transport | Connected outward; no session read occurred without a Dots request |
+| Windows local CI | Existing pipeline passed typecheck, 57 service tests plus 5 relay fixtures, build, package and unchanged-source check; reused root dependencies with `-SkipInstall` |
+| Existing watch | Preserved paused and nonautomatic; no session instruction or worker notification |
+| Actual Dots inspection and judgment | Not yet verified; the user relayed Dots's missing-tool reply, and the native account permission check confirmed the private plugin was not installed. No read or review was recorded |
+| Post-response and overnight supervision | Not verified; regular reviews and coding control are not implemented by this probe |
+
+No model API key, payment configuration, additional coding session or public PC
+tunnel was created. Account/private source credentials and conversation records
+remain outside the public repository. Platform hosting entitlement/cost is not
+inferred from a successful deployment. This is a connection experiment and
+controlled test evidence, not a new security audit or automatic-management pass.
+
 ## Worker-reporting constraint clarification: 2026-10-03
 
 The 0.1.3 documentation/skill working tree based on `1d01aff` makes the user's

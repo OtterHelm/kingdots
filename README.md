@@ -228,6 +228,12 @@ minutes, configurable) and automatic recovery remain gated on the actual Dots
 round trip. Detailed compatibility and test evidence live
 in [verification results](docs/verification-results.md).
 
+An experimental [request-driven relay](experiments/dots-pull-relay/README.md)
+lets Dots request an original-session read through an owner-private MCP plugin;
+the PC polls outward and returns records without worker reports or a public PC
+endpoint. Its two tools are limited to inspection and a no-action review. It is
+separate from the 18-tool local plugin and requires actual Dots connection testing.
+
 The signed event outbox uses `task.attention_required` and `task.completed`, with
 `taskId` holding the watch ID for compatibility. See the
 [interface contract](docs/interfaces.md) for subscriptions and decision records.

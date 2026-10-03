@@ -152,6 +152,8 @@ kingdots start
 
 현재는 기존 Codex 세션을 위한 앱 호스트 연결과 CLI 메타데이터 조회에 집중합니다. Dots 계정 연결·자동 관리와 Claude·OpenCode 어댑터는 실험 단계입니다. 정기 내용 검토(계획상 기본 15분, 변경 가능)와 자동 복구는 실제 Dots 왕복 연결이 통과한 뒤 구현합니다. 호환성과 상세 시험 근거는 [검증 결과](verification-results.md)에 보관합니다.
 
+실험 단계의 [요청 기반 중계](../experiments/dots-pull-relay/README.md)는 소유자 전용 비공개 MCP 플러그인을 통해 Dots가 원래 세션의 조회를 요청하게 합니다. PC가 외부로 대기 요청을 조회하고 기존 기록을 반환하므로 작업 AI의 보고나 공개 PC 접속 주소가 필요하지 않습니다. 도구 두 개는 조회와 지시 없는 판단 기록만 제공합니다. 로컬 도구 18개를 가진 플러그인과 별개이며 실제 Dots 연결 시험이 필요합니다.
+
 서명된 이벤트 전송 기록은 `task.attention_required`와 `task.completed`를 사용하며 호환성을 위해 `taskId`에 감시 ID를 넣습니다. 구독과 판단 기록은 [인터페이스](interfaces.md)를 참고하세요.
 
 ## 안전·개인정보·사용량

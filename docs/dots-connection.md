@@ -11,6 +11,34 @@ a worker to call supervision tools or run a reporting script. The historical
 message probes below were separate connection tests, not a worker reporting
 workflow or evidence that periodic Dots supervision is implemented.
 
+## Experimental request-driven private relay
+
+The current connection probe uses a separate owner-private Sites MCP plugin and
+an outbound PC transport. Dots calls `inspect_existing_session`; the PC retrieves
+that request, reads the selected original conversation through the local service,
+and returns its existing records. Dots calls `record_no_action_review`; the PC
+retrieves that correlated judgment. No coding worker reports, notifies Dots,
+starts a supervisor or sends a setup message. The human assigns the initial test
+directly to the existing Dot.
+
+This route exposes no public endpoint on the PC and does not forward the local
+dashboard, API or OAuth gateway. Sites manages the private plugin and OAuth. The
+PC uses a separately stored provisioned service credential and a pairing token;
+it never forges a user identity. Recent conversation content crosses the
+authenticated hosting boundary, so this external scope needs explicit user
+authorization. No model API key or paid setup is part of the probe.
+
+Private deployment, authenticated outbound device access and unauthenticated
+access rejection have been checked. Plugin discovery/installation is a separate
+account step. Actual Dots inspection, its no-action callback and a check-in after
+its initial response ends remain independent gates; platform account identity
+alone cannot certify Dots's authorship. Leave the selected watch paused during
+this read-only gate. The probe has no session-send or permission-approval tool.
+
+Use the [probe source and reproduction instructions](../experiments/dots-pull-relay/README.md).
+The installed 18-tool local plugin is unchanged by connecting this separate
+two-tool private plugin. No automatic management claim follows from deployment.
+
 ## Local setup
 
 1. Build the checkout, start the local service and run `kingdots install-plugin`

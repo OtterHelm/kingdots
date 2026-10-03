@@ -2,6 +2,15 @@
 
 Generated from the locked production dependency inventory. Dependencies retain their own licenses. Provider account terms and separately installed executables are outside this package.
 
+## Separate experimental relay tooling
+
+The source-only `experiments/dots-pull-relay` lockfile declares `drizzle-orm`
+0.45.2 (Apache-2.0) and `drizzle-kit` 0.31.10 (MIT) as development tooling for
+generated D1 migrations. They are not additions to the main production dependency
+inventory below and are not bundled into its local npm/plugin distribution.
+Their installed packages retain their own license files and transitive notices.
+This addition does not refresh the main dependency/security audit snapshot.
+
 ## @anthropic-ai/claude-agent-sdk 0.3.287
 
 Declared license: SEE LICENSE IN README.md

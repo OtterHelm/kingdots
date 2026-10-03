@@ -20,6 +20,13 @@ discovery still lacks kingdots read/decision tools. These are prerequisite fixes
 the approved 15-minute configurable proactive review loop and safe automatic
 recovery are gated on that connection and are not implemented yet.
 
+An owner-private request-driven MCP relay now exists as a source-only connection
+experiment. Deployment and authenticated outbound PC access passed. It exposes
+only original-session inspection and a correlated no-action judgment, without
+worker notifications or public PC ingress. The actual Dot must be connected and
+assigned the initial test directly by the human. Dots tool use, decision return,
+post-response checks and safe session instructions are still separate gates.
+
 Bounded native app messages now have actual Dots receipt and user-facing reply
 evidence. The read/wait return path omits those replies. The next connectivity
 trial is Dots's own existing-task follow-up tool against the selected local Codex

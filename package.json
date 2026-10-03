@@ -45,7 +45,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && vite build",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts && node --test experiments/dots-pull-relay/tests/*.test.mjs",
     "test:live": "tsx scripts/live-codex.ts",
     "dev": "tsx src/cli.ts serve",
     "dev:web": "vite --host 127.0.0.1",

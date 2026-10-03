@@ -1,0 +1,12 @@
+{
+  "name": "kingdots-private-supervision-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate-artifact.mjs",
+    "test": "node --test tests/relay.test.mjs",
+    "db:generate": "drizzle-kit generate"
+  },
+  "devDependencies": {"drizzle-orm":"0.45.2","drizzle-kit":"0.31.10"}
+}

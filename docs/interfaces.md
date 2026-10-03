@@ -176,6 +176,42 @@ invalidates tokens, pauses managed watches and stops that grant's subscriptions.
 Changing origin revokes prior grants. External connector/Dots compatibility is
 unverified; source behavior is not a certification of OAuth compliance.
 
+## Experimental Dots pull relay
+
+The separate source in `experiments/dots-pull-relay` is a connection-gate probe,
+not an extra set of local service tools. Its stateless HTTP `POST /mcp` supports
+initialization, static discovery and two tools:
+
+| Tool | Input | Result and boundary |
+| ---- | ----- | ------------------- |
+| `inspect_existing_session` | Stable `commandId` (8–128 letters, digits, `_.:-`) | Queue one read, then return snapshot, `inspectionId` and nonce; no arbitrary target |
+| `record_no_action_review` | `inspectionId`, nonce, reason (1–4000 characters) | Record only `continue_observation`; no session instruction, approval or resume |
+
+Data-bearing MCP calls require the platform's trusted authenticated-user identity;
+the first account is pinned under the owner-private hosting boundary. Missing
+identity returns 401 and another identity returns 403. Discovery contains no
+conversation data. The platform's service credential does not create a user.
+
+The PC uses outbound HTTPS with the officially provisioned Sites service credential
+and its separate pairing token. The worker checks `DEVICE_PAIR_DIGEST`. Endpoints
+are `GET /device/jobs` (atomically claim one request and retrieve reviews),
+`POST /device/result` (matching request ID/nonce, snapshot or error), and
+`POST /device/decision-collected` (mark a review retrieved).
+
+One queued/claimed inspection exists at a time. Identical command IDs return the
+original result. A claimed/unknown request is never automatically requeued.
+Conflicting results and changed duplicate reviews are rejected. Request/review
+records expire after 15 minutes; cleanup occurs on the next relay request. HTTP
+bodies are limited to 96 × 1024 decoded string units and serialized snapshots to
+72 × 1024 string units (UTF-8 byte sizes can be larger). The PC bounds
+record text and explicitly marks truncation; it performs no model summarization.
+
+The finite PC helper preserves the selected paused watch and records requests
+before host reads. A judgment is correlated by inspection ID and nonce, but its
+authenticated account identity alone is not proof of actual Dots authorship.
+Actual tool activity must also be checked. These records do not update service
+review timestamps, activate management or satisfy the post-response review gate.
+
 ## Events
 
 Existing event names `task.attention_required`

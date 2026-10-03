@@ -1,5 +1,20 @@
 # Deployment and upgrades
 
+The experimental [Dots pull relay](../experiments/dots-pull-relay/README.md) is
+source-only and separate from the local npm/plugin distribution. Native Sites
+registration provides an owner-private deployment and private MCP plugin. Keep
+its returned project ID in an ignored local hosting manifest, preserve the
+owner-only audience and publish only a matching pushed source/archive. Use
+generated D1 migrations; do not create schema in request handlers.
+
+The PC transport polls outward and requires no public PC listener or tunnel.
+Keep its provisioned Sites service credential and device pairing token in a
+separate current-user Windows DPAPI vault; configure only the pairing digest as
+a hosted secret. Starting this probe does not activate paused watches. It stops
+after 30 minutes and holds unknown delivery. Connecting the private plugin and
+an actual Dots callback are separate from hosting success. Do not create a model
+API key, enable billing or replace the user-selected session for this test.
+
 kingdots runs on the user's Windows PC under that user's permissions. It is
 distributed as source or an npm-compatible tarball. External HTTPS infrastructure
 is optional and separately operated. The current CI produces local packages;

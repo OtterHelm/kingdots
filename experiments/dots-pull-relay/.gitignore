@@ -1,0 +1,6 @@
+node_modules/
+dist/
+site.tar.gz
+.openai/hosting.json
+.env*
+*.log

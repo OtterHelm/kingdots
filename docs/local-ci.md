@@ -31,6 +31,7 @@ kingdots 전용 runner는 다른 저장소의 runner와 별도로 등록하고 �
 2. `npm ci --include=dev`로 잠긴 의존성 설치.
 3. `npm run typecheck`.
 4. `npm test`.
+   기존 서비스 검사와 요청 기반 중계의 통제된 SQLite fixture 검사를 포함합니다. 실제 Dots·계정·세션에는 연결하지 않습니다.
 5. `npm run build`.
 6. `npm pack --ignore-scripts`로 패키지 생성.
 7. 원본 상태가 바뀌지 않았는지와 패키지에 허용한 파일만 포함되는지 확인.
