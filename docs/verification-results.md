@@ -1,5 +1,34 @@
 # Verification results
 
+## 2026-10-04 — 0.1.4 consolidation and prototype removal
+
+Tested the 0.1.4 working tree based on `a3727464e167dca5cceeebfd5415d8248dbbbfd5`.
+This is maintenance of the existing read/return path, not a new automatic-control
+qualification. Detailed local receipts remain private.
+
+| Check | Observed result | Boundary |
+| ----- | --------------- | -------- |
+| Windows local CI, Node.js 24.18.0 | Types, 44 main tests + 5 relay tests, build, package and unchanged-source check passed | Controlled fixtures; no provider model calls |
+| Adapter cleanup | Creation, prompts, steering, resume, interrupt, approval and worktree creation code removed | Official Codex app-host follow-up remains separately gated |
+| Read-only metadata regressions | Concurrent Codex initialization, unknown external idle/ownership, refusal of unexpected approval and missing-session handling passed | Fixture transports, not new product support certification |
+| Relay regressions | Request-driven read, once-only result, correlation/conflict checks, epoch/release fencing and legacy import passed | Unknown result acknowledgments remain held |
+| Protected configuration | Invalid stdin JSON does not appear in output; removed installer command fails | No new account credentials were created |
+| Package inventory | 92 members; no fixtures, prototype runner, duplicate plugin or standalone gateway modules | Deployable relay source included; private manifests excluded |
+| Targeted publication checks | Known local secret/context values absent from source and decompressed package; paired README structure/examples and 80 local links checked | Not a complete security audit |
+| Local service upgrade | Version 0.1.4 on the same loopback port; original watch JSON unchanged and still paused; three prior judgments imported as unbound history | Connection remains disabled; no Dots request or session instruction executed |
+| Dashboard | Returned-history labels and current support limits visibly confirmed in the authenticated browser | Private screenshot retained locally |
+| Installed plugin cleanup | Optional kingdots-local plugin uninstalled; existing private account plugin/deployment retained and renamed kingdots | Same plugin ID, owner-only audience, no external visitors |
+| Private relay upgrade | Matching pushed source/artifact deployed successfully with MCP enabled | Two existing tools; actual Dots retest pending |
+
+Preliminary CI attempts found two outdated fixture assumptions while removing old
+execution contracts: repeating pause on an already paused watch does not change
+its epoch, and a legacy steering guard fixture had been removed. Those fixtures
+were corrected before the final pass. They are not actual Dots test outcomes.
+
+No new AI provider, schedule, worker session, judgment model, model API key or paid
+model configuration was added. Regular reviews, safe live instruction delivery,
+five-minute intervention and actual overnight acceptance remain unverified.
+
 Latest local check: **2026-10-03 (Asia/Seoul)**. Historical Dots checks below were
 performed on 2026-10-02. Results describe the tested installation or working tree,
 not universal support. Raw account, session and machine records stay in ignored

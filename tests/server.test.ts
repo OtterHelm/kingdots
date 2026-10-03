@@ -3,6 +3,91 @@ import assert from "node:assert/strict";
 import { fixture, repaired } from "./helpers.js";
 import { Events } from "../src/events.js";
 import { buildServer } from "../src/server.js";
+import type { RelayReview } from "../src/relay.js";
+
+test("historical execution capabilities cannot promote removed adapter control", async () => {
+  const f = await fixture();
+  try {
+    f.store.put("settings", "capability:codex-cli:steer", {
+      feature: "steer",
+      version: "fixture",
+      state: "supported",
+      evidence: "Old worker execution",
+    });
+    const info = (await f.manager.capabilities())[0];
+    assert.equal(
+      info.capabilities.find((capability) => capability.feature === "steer")
+        ?.state,
+      "unsupported",
+    );
+    assert.equal(
+      f.store.get<any>("settings", "capability:codex-cli:steer")?.evidence,
+      "Old worker execution",
+    );
+  } finally {
+    await f.cleanup();
+  }
+});
+
+test("returned reviews require the UI token and removed gateway routes cannot grant access", async () => {
+  const f = await fixture();
+  const app = buildServer(
+    f.manager,
+    new Events(f.store, { get: () => undefined, set: async () => {} }),
+    { ui: "ui", mcp: "mcp" },
+  );
+  try {
+    f.store.put("relay_reviews", "fixture-review", {
+      inspectionId: "fixture-review",
+      nonce: "nonce",
+      decision: "continue_observation",
+      reason: "History",
+      source: "sites_authenticated_owner_not_independent_dot_identity_proof",
+      watchId: null,
+      sessionId: null,
+      epoch: null,
+      receivedAt: "2026-10-03T00:00:00Z",
+      legacy: true,
+    } satisfies RelayReview);
+    assert.equal(
+      (
+        await app.inject({
+          url: "/api/relay/reviews",
+          headers: { authorization: "Bearer mcp" },
+        })
+      ).statusCode,
+      401,
+    );
+    const response = await app.inject({
+      url: "/api/relay/reviews",
+      headers: { authorization: "Bearer ui" },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.json()[0].legacy, true);
+    assert.equal(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/api/gateway/configure",
+          headers: { authorization: "Bearer ui" },
+          payload: { origin: "https://example.invalid" },
+        })
+      ).statusCode,
+      404,
+    );
+    const status = (
+      await app.inject({
+        url: "/api/status",
+        headers: { authorization: "Bearer ui" },
+      })
+    ).json();
+    assert.equal(status.gateway, undefined);
+    assert.equal(status.relay.enabled, false);
+  } finally {
+    await app.close();
+    await f.cleanup();
+  }
+});
 
 test("UI and MCP credentials have separate roles; host and origin checks prevent browser cross-site commands", async () => {
   const f = await fixture();

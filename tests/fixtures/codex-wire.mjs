@@ -1,102 +1,86 @@
 import { createInterface } from "node:readline";
-const send = (v) => process.stdout.write(JSON.stringify(v) + "\n");
-let active = false,
-  started = false,
-  authReads = 0;
-const authMode =
-  process.argv.find((a) => a.startsWith("--fixture-auth="))?.split("=")[1] ??
-  "chatgpt";
+const send = (value) => process.stdout.write(JSON.stringify(value) + "\n");
+let deferred;
+let initialized = false;
 createInterface({ input: process.stdin }).on("line", (line) => {
-  const r = JSON.parse(line);
-  if (r.id === undefined) return;
-  const reply = (result) => send({ id: r.id, result });
-  switch (r.method) {
+  const request = JSON.parse(line);
+  if (request.method === "initialized") initialized = true;
+  if (request.id === "fixture-permission" && request.error) {
+    send({
+      id: deferred,
+      result: {
+        thread: {
+          id: "approval-fixture",
+          status: { type: "notLoaded" },
+          preview: "Permission refused",
+        },
+      },
+    });
+    return;
+  }
+  if (request.id === undefined) return;
+  if (["thread/list", "thread/read"].includes(request.method) && !initialized) {
+    send({
+      id: request.id,
+      error: {
+        code: -1,
+        message: "Client used metadata before initialization",
+      },
+    });
+    return;
+  }
+  const reply = (result) => send({ id: request.id, result });
+  switch (request.method) {
     case "initialize":
       reply({});
       break;
     case "account/read":
-      authReads++;
-      reply({
-        account: {
-          type:
-            authMode === "change"
-              ? authReads === 1
-                ? "chatgpt"
-                : "apiKey"
-              : authMode,
-        },
-        requiresOpenaiAuth: true,
-      });
+      reply({ account: { type: "chatgpt" } });
       break;
-    case "model/list":
+    case "thread/list":
       reply({
         data: [
-          { id: "fixture-model", model: "fixture-model", isDefault: true },
+          {
+            id: "saved-fixture",
+            status: { type: "notLoaded" },
+            cwd: "fixture-project",
+            preview: "Stored metadata",
+          },
         ],
       });
       break;
-    case "thread/start":
-      reply({
-        thread: {
-          id: "fixture-thread",
-          cwd: process.cwd(),
-          status: { type: "idle" },
-        },
-      });
-      break;
-    case "turn/start":
-      reply({ turn: { id: "fixture-turn", status: "inProgress" } });
-      setTimeout(() => {
-        started = true;
-        active = true;
-        send({
-          method: "turn/started",
-          params: {
-            threadId: "fixture-thread",
-            turn: { id: "fixture-turn", status: "inProgress" },
-          },
-        });
-      }, 250);
-      break;
-    case "turn/interrupt":
-      if (!started) {
-        send({
-          id: r.id,
-          error: { code: -1, message: "no active turn to interrupt" },
-        });
-      } else {
-        active = false;
-        reply({});
-        send({
-          method: "turn/completed",
-          params: {
-            threadId: "fixture-thread",
-            turn: { id: "fixture-turn", status: "interrupted" },
-          },
-        });
-      }
-      break;
-    case "turn/steer":
-      if (!active)
-        send({
-          id: r.id,
-          error: { code: -1, message: "Steering was sent before startup" },
-        });
-      else reply({ turnId: "fixture-turn" });
-      break;
     case "thread/read":
-      reply({
-        thread: {
-          id: "fixture-thread",
-          cwd: process.cwd(),
-          status: { type: active ? "active" : "idle" },
-        },
-      });
-      break;
-    case "thread/loaded/list":
-      reply({ data: ["fixture-thread"] });
+      if (request.params.threadId === "missing-fixture")
+        send({
+          id: request.id,
+          error: { code: -1, message: "Fixture session not found" },
+        });
+      else if (request.params.threadId === "approval-fixture") {
+        deferred = request.id;
+        send({
+          id: "fixture-permission",
+          method: "item/commandExecution/requestApproval",
+          params: {},
+        });
+      } else
+        reply({
+          thread: {
+            id: request.params.threadId,
+            status: {
+              type:
+                request.params.threadId === "active-fixture"
+                  ? "active"
+                  : "notLoaded",
+            },
+            cwd: "fixture-project",
+            preview: "Existing metadata",
+          },
+        });
       break;
     default:
-      reply({});
+      send({
+        id: request.id,
+        error: { code: -32601, message: "Fixture permits metadata reads only" },
+      });
   }
 });

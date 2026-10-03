@@ -10,7 +10,7 @@ import { tools, callTool, toolDefinitions } from "./tools.js";
 import { DomainError } from "./domain.js";
 import { fingerprint } from "./workspace.js";
 import { Observer } from "./watch.js";
-import type { GatewayAuth } from "./gateway-auth.js";
+import type { RelayConnector, RelayReview } from "./relay.js";
 
 function equal(actual: string, expected: string) {
   const a = Buffer.from(actual),
@@ -25,7 +25,7 @@ export function buildServer(
     webDir?: string;
     onShutdown?: () => void;
     observer?: Observer;
-    gatewayAuth?: GatewayAuth;
+    relay?: RelayConnector;
   } = {},
 ) {
   const app = Fastify({ logger: false, bodyLimit: 1024 * 1024 });
@@ -85,8 +85,8 @@ export function buildServer(
   });
   app.get("/healthz", async () => ({ status: "ok", service: "kingdots" }));
   app.get("/api/status", async () => ({
-    version: "0.1.3",
-    connectionMode: "local-stdio",
+    version: "0.1.4",
+    connectionMode: "private-relay-and-local-mcp",
     apiBilling: "forbidden",
     tunnelEnabled: false,
     tasks: manager.store.tasks().length,
@@ -95,7 +95,7 @@ export function buildServer(
     supervisor: "dots",
     createsSessions: false,
     appHost: observer.appHost?.info() ?? { available: false },
-    gateway: options.gatewayAuth?.info() ?? { configured: false },
+    relay: options.relay?.status() ?? { configured: false, enabled: false },
     connection: manager.store.get("settings", "dots_connection") ?? {
       unattendedAcceptance: "unverified",
     },
@@ -115,57 +115,16 @@ export function buildServer(
     );
   });
   app.get("/api/watches", async () => manager.store.watches());
-  app.get("/api/gateway", async () => ({
-    info: options.gatewayAuth?.info(),
-    pending: options.gatewayAuth?.pending() ?? [],
-    grants: options.gatewayAuth?.grants() ?? [],
-  }));
-  app.post("/api/gateway/configure", async (req) => {
-    if (!options.gatewayAuth)
-      throw new DomainError(
-        "gateway_unavailable",
-        "Gateway is unavailable",
-        503,
-      );
-    return options.gatewayAuth.configure(
-      z.object({ origin: z.string() }).parse(req.body).origin,
-    );
-  });
-  app.post<{ Params: { id: string } }>(
-    "/api/gateway/approvals/:id",
-    async (req) => {
-      if (!options.gatewayAuth)
-        throw new DomainError(
-          "gateway_unavailable",
-          "Gateway is unavailable",
-          503,
-        );
-      const input = z
-        .object({
-          displayCode: z.string(),
-          watchIds: z.array(z.string()).min(1),
-          scopes: z.array(z.enum(["kingdots:read", "kingdots:manage"])).min(1),
-        })
-        .parse(req.body);
-      return options.gatewayAuth.approve(
-        req.params.id,
-        input.displayCode,
-        input.watchIds,
-        input.scopes,
-      );
-    },
-  );
-  app.post<{ Params: { id: string } }>(
-    "/api/gateway/grants/:id/revoke",
-    async (req) => {
-      options.gatewayAuth?.revokeGrant(req.params.id);
-      return { revoked: true };
-    },
+  app.get("/api/relay/reviews", async () =>
+    manager.store.values<RelayReview>("relay_reviews"),
   );
   app.post("/api/watches", async (req) => observer.create(req.body));
   app.get<{ Params: { id: string } }>("/api/watches/:id", async (req) => ({
     watch: manager.store.getWatch(req.params.id),
     commands: manager.store.commands(req.params.id),
+    reviews: manager.store
+      .values<RelayReview>("relay_reviews")
+      .filter((r) => r.watchId === req.params.id),
   }));
   app.post<{ Params: { id: string; action: string } }>(
     "/api/watches/:id/:action",
@@ -223,10 +182,9 @@ export function buildServer(
   app.get("/api/instructions", async () => ({
     mcpEndpoint: "/mcp",
     eventsProtocol: "2026-07-28",
-    tunnelGuide:
-      "https://developers.openai.com/api/docs/guides/secure-mcp-tunnels",
+    connectionGuide: "docs/dots-connection.md",
     eventsGuide: "https://developers.openai.com/plugins/build/mcp-events",
-    note: "Local connection does not verify Dots wake-up. Credentials and account permissions are configured by the user.",
+    note: "Local MCP is diagnostic. The private relay provides inspection/no-action review; regular unattended management remains unverified.",
   }));
   app.post("/api/shutdown", async () => {
     setTimeout(() => options.onShutdown?.(), 100);
@@ -259,7 +217,7 @@ export function buildServer(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.3" },
+            serverInfo: { name: "kingdots", version: "0.1.4" },
             instructions:
               "Dots supervises only user-selected existing sessions. No new workers or worktrees. Observe healthy work quietly, refresh original host state before a follow-up, and reconcile unknown delivery. Host permission and management resume are user-only controls. Completion evidence is host-reported; actual unattended Dots wake-up remains unverified.",
           };

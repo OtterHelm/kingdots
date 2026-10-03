@@ -10,5 +10,4 @@ export {
   type AppHostTransport,
   type HostSnapshot,
 } from "./app-host.js";
-export { GatewayAuth } from "./gateway-auth.js";
-export { buildGateway } from "./gateway.js";
+export { RelayConnector, relayConfigSchema } from "./relay.js";

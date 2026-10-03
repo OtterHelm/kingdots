@@ -11,7 +11,7 @@ Reviewed on **2026-10-02**. This is a scoped source review, regression verificat
 dependency advisory check, and publication scan. It is not an independent penetration
 test or a guarantee that the preview has no vulnerabilities.
 
-## Current app-host and gateway boundaries
+## App-host and gateway boundaries in the earlier reviewed snapshot
 
 Documentation updated on **2026-10-03** to describe current source. This addition
 does not extend the historical publication scan, dependency audit or security
@@ -139,3 +139,21 @@ specific commit as current evidence.
 
 Recheck credentials, dependency advisories, regression tests, and package contents
 before releases. Describe the actual tested scope when reporting security results.
+
+## 0.1.4 implementation scope change
+
+The standalone PC OAuth gateway, duplicate local management-plugin installer,
+finite device probe, legacy worker manager, adapter execution/approval handlers
+and worktree creation code are removed. The existing private
+relay is deployment source; its PC transport now runs in the main local service
+and stores correlated jobs/reviews in the canonical database. Existing host tools
+and their permissions remain in force. Imported old evidence has no current scope.
+
+Relay traffic uses the configured trusted HTTPS origin with redirects rejected,
+the native hosting service credential and separate pairing token. Returned account
+identity does not independently prove Dots authorship. Conversation masking is
+limited, so records may contain private text. Expired remote payloads are removed;
+request-ID tombstones remain. Unknown result acknowledgments are held.
+
+This description updates implementation boundaries; it does not refresh the
+earlier audit date or claim an independent review of the consolidated runtime.

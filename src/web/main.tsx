@@ -70,7 +70,7 @@ function App() {
   const [detail, setDetail] = useState<any>(null),
     [status, setStatus] = useState<any>(null),
     [caps, setCaps] = useState<any[]>([]),
-    [gateway, setGateway] = useState<any>(null);
+    [reviews, setReviews] = useState<any[]>([]);
   const [tab, setTab] = useState("watches"),
     [modal, setModal] = useState(false),
     [busy, setBusy] = useState(false),
@@ -93,7 +93,7 @@ function App() {
       const [all, info] = await Promise.all([api("/watches"), api("/status")]);
       setWatches(all);
       setStatus(info);
-      if (tab === "connections") setGateway(await api("/gateway"));
+      if (tab === "dots") setReviews(await api("/relay/reviews"));
       if (selected) setDetail(await api("/watches/" + selected));
       setError("");
     } catch (e) {
@@ -122,26 +122,6 @@ function App() {
       setError((e as Error).message);
     } finally {
       setBusy(false);
-    }
-  }
-  async function consent(
-    event: React.FormEvent<HTMLFormElement>,
-    pending: any,
-  ) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    try {
-      await api(`/gateway/approvals/${pending.id}`, {
-        displayCode: String(data.get("code")),
-        watchIds: data.getAll("watch"),
-        scopes: data.has("manage")
-          ? ["kingdots:read", "kingdots:manage"]
-          : ["kingdots:read"],
-      });
-      setGateway(await api("/gateway"));
-      await refresh();
-    } catch (error) {
-      setError((error as Error).message);
     }
   }
   async function enroll(event: React.FormEvent<HTMLFormElement>) {
@@ -473,64 +453,19 @@ function App() {
                   : "연결 문맥 없음 · 기존 Codex 대화에서 kingdots를 시작하세요"}
               </p>
               <p>
-                원격 연결: {gateway?.info?.publicOrigin ?? "아직 설정하지 않음"}
-                . 실제 Dots 자동 재확인은 미검증이에요.
+                비공개 중계:{" "}
+                {status?.relay?.configured ? "설정됨" : "설정되지 않음"} ·{" "}
+                {status?.relay?.enabled ? "연결 허용" : "연결 꺼짐"}
               </p>
-              {(gateway?.pending ?? []).map((pending: any) => (
-                <form
-                  key={pending.id}
-                  onSubmit={(event) => void consent(event, pending)}
-                >
-                  <h3>연결 허용 요청 · {pending.clientName}</h3>
-                  <p>
-                    OAuth 창의 코드 {pending.displayCode}와 요청 범위를
-                    확인하세요.
-                  </p>
-                  <label>
-                    확인 코드
-                    <input name="code" required autoComplete="off" />
-                  </label>
-                  {watches
-                    .filter((w) =>
-                      w.sessions.every(
-                        (s) =>
-                          s.source === "app_host" && s.backend === "codex-app",
-                      ),
-                    )
-                    .map((w) => (
-                      <label key={w.id}>
-                        <input name="watch" type="checkbox" value={w.id} />
-                        {w.goal}
-                      </label>
-                    ))}
-                  {pending.scopes.includes("kingdots:manage") && (
-                    <label>
-                      <input name="manage" type="checkbox" />
-                      선택한 감시의 범위 안에서 지시 전달·중단·보고 허용
-                    </label>
-                  )}
-                  <button type="submit">선택한 감시에 연결 허용</button>
-                </form>
-              ))}
-              {(gateway?.grants ?? [])
-                .filter((g: any) => !g.revoked)
-                .map((g: any) => (
-                  <div key={g.id}>
-                    <p>
-                      연결 범위: {g.watchIds.length}개 감시 ·{" "}
-                      {g.scopes.join(", ")}
-                    </p>
-                    <button
-                      onClick={() =>
-                        void api(`/gateway/grants/${g.id}/revoke`, {})
-                          .then(() => refresh())
-                          .catch((e) => setError(e.message))
-                      }
-                    >
-                      연결 허용 해제
-                    </button>
-                  </div>
-                ))}
+              <p>전송 상태: {status?.relay?.transport?.state ?? "기록 없음"}</p>
+              <p>
+                마지막 정상 연결:{" "}
+                {status?.relay?.transport?.lastHealthyAt ?? "아직 없음"}
+              </p>
+              <p>
+                확인되지 않은 조회 결과: {status?.relay?.unknownResults ?? 0}건
+                · 자동 재전송하지 않아요.
+              </p>
             </section>
             <p>
               로컬 어댑터의 조회와 Dots의 공식 앱 세션 접근은 별도로 검증해야
@@ -566,13 +501,13 @@ function App() {
           <section className="connection dots-panel">
             <h2>Dots가 관리 주체예요</h2>
             <p>
-              정상 진행 중인 기존 세션은 그대로 두고, 질문·오류·멈춤 가능성·응답
-              종료 때 Dots가 목표와 근거를 확인해요. 후속 지시도 같은 세션으로
-              보내요.
+              Dots가 기존 기록을 검토하고 개입 필요 여부를 판단해요. 현재 계정
+              플러그인은 세션 조회와 지시 없는 판단 반환을 제공해요.
             </p>
             <div className="warning">
-              현재 로컬 관찰·지시 기록 기능을 제공해요. Dots의 실제 호스트 도구
-              연결과 사용자 메시지 없는 자동 깨우기는 아직 검증되지 않았어요.
+              이전 연결에서 조회·판단 반환·응답 종료 후 1회성 재조회가 제한된
+              시험을 통과했어요. 통합 경로의 실제 Dots 재시험은 대기 중이며, 정기
+              감시·안전한 지시·야간 자동 관리는 미검증이에요.
             </div>
             <div className="facts">
               <div>
@@ -584,8 +519,8 @@ function App() {
                 <b>제공하지 않음</b>
               </div>
               <div>
-                <span>Dots 후속 판단 기록</span>
-                <b>{status?.connection?.lastDotsDecisionAt ?? "아직 없음"}</b>
+                <span>판단 반환 기록</span>
+                <b>{status?.relay?.lastReviewAt ?? "아직 없음"}</b>
               </div>
               <div>
                 <span>밤새 자동 관리 합격</span>
@@ -593,9 +528,26 @@ function App() {
               </div>
             </div>
             <p>
-              API 키나 별도 판단용 모델을 사용하지 않아요. 로컬 MCP 설치 또는
-              이벤트 수신만으로 자동 관리 합격을 표시하지 않아요.
+              API 키나 별도 판단용 모델을 사용하지 않아요. 연결 설치 또는 이벤트
+              수신만으로 자동 관리 합격을 표시하지 않아요.
             </p>
+            <h3>회수한 판단 기록 · {reviews.length}건</h3>
+            <p className="muted">
+              인증된 계정의 반환 기록이에요. 이 기록만으로 Dots 실행 주체나 자동
+              관리 합격을 증명하지 않아요.
+            </p>
+            {reviews.map((r) => (
+              <div className="connection" key={r.inspectionId}>
+                <strong>지시 없이 계속 관찰</strong>
+                <p>{r.reason}</p>
+                <small>
+                  {new Date(r.receivedAt).toLocaleString("ko-KR")} ·{" "}
+                  {r.legacy
+                    ? "이전 시험에서 가져온 이력 · 현재 감시와 연결되지 않음"
+                    : "현재 연결에서 회수"}
+                </small>
+              </div>
+            ))}
           </section>
         )}
       </main>

@@ -22,7 +22,9 @@ export class Store {
       CREATE TABLE IF NOT EXISTS subscriptions (id TEXT PRIMARY KEY, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS deliveries (subscription_id TEXT NOT NULL, event_id TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY(subscription_id,event_id));
       CREATE TABLE IF NOT EXISTS approvals (id TEXT PRIMARY KEY, body TEXT NOT NULL);
-      PRAGMA user_version=1;`);
+      CREATE TABLE IF NOT EXISTS relay_jobs (id TEXT PRIMARY KEY, body TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS relay_reviews (id TEXT PRIMARY KEY, body TEXT NOT NULL);
+      PRAGMA user_version=2;`);
   }
   transaction<T>(fn: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
@@ -145,7 +147,12 @@ export class Store {
     ).map((r) => JSON.parse(r.body));
   }
   get<T>(
-    table: "settings" | "subscriptions" | "approvals",
+    table:
+      | "settings"
+      | "subscriptions"
+      | "approvals"
+      | "relay_jobs"
+      | "relay_reviews",
     key: string,
   ): T | null {
     const col = table === "settings" ? "key" : "id";
@@ -155,7 +162,12 @@ export class Store {
     return r ? JSON.parse(r.body) : null;
   }
   put(
-    table: "settings" | "subscriptions" | "approvals",
+    table:
+      | "settings"
+      | "subscriptions"
+      | "approvals"
+      | "relay_jobs"
+      | "relay_reviews",
     key: string,
     value: unknown,
   ) {
@@ -166,9 +178,13 @@ export class Store {
       )
       .run(key, JSON.stringify(value));
   }
-  values<T>(table: "subscriptions" | "approvals"): T[] {
+  values<T>(
+    table: "subscriptions" | "approvals" | "relay_jobs" | "relay_reviews",
+  ): T[] {
     return (
-      this.db.prepare(`SELECT body FROM ${table}`).all() as { body: string }[]
+      this.db
+        .prepare(`SELECT body FROM ${table} ORDER BY rowid DESC`)
+        .all() as { body: string }[]
     ).map((r) => JSON.parse(r.body));
   }
   close() {

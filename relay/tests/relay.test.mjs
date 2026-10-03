@@ -65,8 +65,12 @@ test('expired snapshots and decisions are not returned or treated as a current r
   f.db.prepare('INSERT INTO relay_decisions VALUES (?,?,?,?,?,?)').run('expired-read','fixture-owner','{}',0,0,1);
   const result=await f.decoded(await f.call('record_no_action_review',{inspectionId:'expired-read',nonce:'old-nonce',reason:'stale'}));
   assert.equal(result.error,'uncorrelated_review');
-  assert.equal(f.db.prepare('SELECT count(*) n FROM relay_requests').get().n,0);
+  assert.equal(f.db.prepare("SELECT state,snapshot FROM relay_requests WHERE id='expired-read'").get().state,'expired');
+  assert.equal(f.db.prepare("SELECT snapshot FROM relay_requests WHERE id='expired-read'").get().snapshot,null);
   assert.equal(f.db.prepare('SELECT count(*) n FROM relay_decisions').get().n,0);
+  const reused=await f.decoded(await f.call('inspect_existing_session',{commandId:'expired-read'}));
+  assert.equal(reused.error,'inspection_expired');
+  assert.equal(f.db.prepare('SELECT count(*) n FROM relay_requests').get().n,1);
 });
 test('concurrent different read requests reserve only one outstanding inspection',async t=>{
   const f=await fixture(t);

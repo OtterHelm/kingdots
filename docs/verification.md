@@ -1,70 +1,46 @@
 # Existing-session verification
 
-Run `npm run typecheck`, `npm test` and `npm run build`. Local CI validates the
-package and unchanged source as well. Controlled tests do not call provider models.
+Run npm run typecheck, npm test and npm run build. Windows local CI additionally
+validates the package and unchanged source. Controlled tests do not call provider
+models; actual Dots acceptance is recorded separately.
 
-The observer regressions cover:
+Observer and app-host regressions cover registration without worker creation,
+quiet observations, immutable IDs, stale/permission/active-state fencing,
+reservations, uncertain delivery, intervention, pause during dispatch, shutdown,
+restart and fresh completion-condition references. Public MCP cannot approve
+permissions or resume management. UI and MCP credentials have separate roles;
+Host and Origin checks reject browser cross-site commands.
 
-- registration/polling/pause without worker creation, external resume, interruption
-  or a new Git worktree;
-- quiet healthy observations and deduplicated attention for questions/errors;
-- immutable observation IDs and replay protection that cannot refresh stale state;
-- active, permission, unknown, stale and user-intervened follow-up fencing;
-- same-session reservations, one-time claims, unknown delivery and host reconciliation;
-- restart cancellation of proven-unsent messages and retention of uncertain sends;
-- final reporting against fresh idle snapshots and each original completion condition;
-- public worker creation/execution disabled and management resume inaccessible to MCP.
+Relay regressions cover request-driven reads, nonce/target correlation, changed
+review rejection, unchanged paused watches, held unknown result delivery, release
+fencing and idempotent import of old evidence without granting current authority.
+Remote fixtures cover owner/device authentication, atomic once-only claims,
+concurrent request exclusion, result/review conflicts and expired-ID tombstones.
 
-The app-host and OAuth fixture suites additionally cover:
+Metadata adapter fixtures ensure stored Codex/Claude records cannot establish
+external idle ownership, unknown sessions do not cause creation, and a read-only
+Codex client refuses unexpected host approval requests. Old adapter execution
+tests were replaced by these actual current-contract checks.
 
-- one send to the original idle session, repeated-send suppression and host receipts;
-- running/permission/changed host state blocking delivery;
-- lost app-host response staying unknown and reserved;
-- external user input versus recognized own delegation, and pause during preflight;
-- pause after a claim but before native transport dispatch, and waiting for receipts on shutdown;
-- caller observations/receipts unable to impersonate the app-host transport;
-- API-key, unknown and custom-provider contexts rejected by app-host write policy;
-- exact callbacks/resources, local consent, original browser cookies and S256 PKCE;
-- single-use codes, rotating refresh tokens, scope restrictions and grant revocation;
-- one gateway management grant per watch, scoped reads/writes and no local API exposure.
-- official MCP SDK calls to the scoped HTTP gateway and event-owner revocation.
+Official MCP SDK tests verify local discovery and calls. Retained historical task
+evidence is created as a fixture without executing a worker. Removed worker-manager
+and standalone OAuth-gateway suites no longer test deployed functionality.
+Manual prototype scripts and provider-usage live runners have been removed.
 
-These use controlled transports and injected HTTP requests. They do not establish
-real installed-app compatibility, external TLS/proxy operation, ChatGPT linking
-or post-response Dots behavior. Gateway owner revocation is enforced in runtime
-and event dispatch, but a fixture pass is not a full deployed security review.
+For UI checks, use the built loopback dashboard with a local authenticated browser.
+Confirm connection state, returned review history, imported-history labels,
+management controls and narrow-screen rendering. Do not publish screenshots
+containing personal IDs, paths, credentials or conversation text.
 
-The service does not execute completion tests in a new worker or project clone.
-`watch_finish` checks referenced, host-reported evidence and snapshot freshness;
-Dots must inspect the actual original-host tests and artifacts. It is not independent
-verification of file contents, semantic task quality or the authenticity of a
-caller's claimed user request.
+The actual release gate is Dots managing an already-working selected session after
+its initial response ends, without additional user messages, replacement sessions
+or worker reports. Verify proactive regular reviews, urgent questions/errors,
+safe same-session follow-up, fresh tests/artifacts and final reporting.
+This remains unverified. The consolidated read/no-action path also requires an
+actual Dots retest; historical probe passes do not certify it.
 
-`scripts/browser-check.ts` exercises authenticated watch registration, details,
-pause/resume, selected-watch OAuth consent and revocation, the Dots status panel
-and mobile layout with a fictitious session ID.
-It does not connect or control a real coding session.
+watch_finish checks fresh host-reported evidence and references. The service does
+not independently run completion tests or verify original file contents.
 
-`scripts/local-connection-check.ts` checks official MCP SDK initialization, tool
-discovery and read-only capability queries without model calls. Its result does
-not establish actual Dots host access or an unattended wake-up.
-
-Earlier `scripts/live-codex.ts` and worker tests are historical execution experiments.
-They are not the current default product flow or acceptance evidence for supervising
-an external session. `test:live` is excluded from CI and consumes provider usage.
-
-The actual release gate is documented in [Dots connection](dots-connection.md):
-an already-working session, the initial Dots response ending, a question/error,
-same-session follow-up, actual fresh evidence and a final user report without any
-additional user message or newly created session. Until independently observed,
-unattended supervision must remain unverified.
-
-Proactive acceptance must succeed while coding sessions send no reports or
-notifications to Dots and invoke no supervision/reporting scripts. Test regular
-reviews during healthy running work and urgent reviews using ordinary questions,
-errors and completion evidence already present in the original session. A worker
-reporting to Dots cannot substitute for the collector observing that state.
-
-See [dated results](verification-results.md) for the actual pass/fail outcome of
-each tested version or working tree. Test coverage listed here is not a claim that
-the current suite passes.
+See [connection](dots-connection.md) and [dated results](verification-results.md).
+Coverage here is a procedure description, not an assertion of a new actual Dots pass.

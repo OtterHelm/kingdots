@@ -2,12 +2,12 @@
 
 Generated from the locked production dependency inventory. Dependencies retain their own licenses. Provider account terms and separately installed executables are outside this package.
 
-## Separate experimental relay tooling
+## Relay schema tooling
 
-The source-only `experiments/dots-pull-relay` lockfile declares `drizzle-orm`
+The `relay/` lockfile declares `drizzle-orm`
 0.45.2 (Apache-2.0) and `drizzle-kit` 0.31.10 (MIT) as development tooling for
 generated D1 migrations. They are not additions to the main production dependency
-inventory below and are not bundled into its local npm/plugin distribution.
+inventory below and are not installed as local runtime dependencies; relay source and locked schema tooling are included for deployment.
 Their installed packages retain their own license files and transitive notices.
 This addition does not refresh the main dependency/security audit snapshot.
 

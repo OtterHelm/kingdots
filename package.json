@@ -1,6 +1,6 @@
 {
   "name": "kingdots",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Local MCP bridge for Dots to observe existing Codex coding sessions, record scoped follow-ups, and track delivery and completion evidence. Development preview.",
   "keywords": [
     "ai-agents",
@@ -10,8 +10,7 @@
     "session-management",
     "local-first",
     "typescript",
-    "windows",
-    "oauth2"
+    "windows"
   ],
   "homepage": "https://github.com/OtterHelm/kingdots#readme",
   "bugs": {
@@ -29,11 +28,19 @@
   "files": [
     "dist",
     "web-dist",
-    "plugins",
     "docs",
     "LICENSE",
     "NOTICE",
-    "README.md"
+    "README.md",
+    "relay/worker",
+    "relay/db",
+    "relay/drizzle",
+    "relay/scripts",
+    "relay/.openai/hosting.template.json",
+    "relay/package.json",
+    "relay/package-lock.json",
+    "relay/drizzle.config.ts",
+    "relay/README.md"
   ],
   "engines": {
     "node": ">=24.0.0"
@@ -43,10 +50,9 @@
     "url": "https://github.com/OtterHelm/kingdots.git"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "node scripts/clean-build.mjs && tsc -p tsconfig.json && vite build",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.web.json --noEmit",
-    "test": "tsx --test --test-concurrency=1 tests/*.test.ts && node --test experiments/dots-pull-relay/tests/*.test.mjs",
-    "test:live": "tsx scripts/live-codex.ts",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts && node --test relay/tests/*.test.mjs",
     "dev": "tsx src/cli.ts serve",
     "dev:web": "vite --host 127.0.0.1",
     "prepack": "npm run typecheck && npm test && npm run build"

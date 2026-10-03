@@ -102,8 +102,8 @@ try {
         $members = @(& tar -tf $packageFile)
         if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect the generated package.' }
         foreach ($member in $members) {
-            if ($member -notmatch '^package/(dist/|web-dist/|plugins/|docs/|LICENSE$|NOTICE$|README\.md$|package\.json$)' -or
-                $member -match '(^|/)(\.kingdots|\.env(?:\.|$)|node_modules|secrets\.bin|kingdots\.sqlite|instance\.json|service\.lock)(/|\.|$)|(^|/)\.\.(/|$)') {
+            if ($member -notmatch '^package/(dist/|web-dist/|relay/(?:worker/|db/|drizzle/|scripts/|\.openai/hosting\.template\.json$|package(?:-lock)?\.json$|drizzle\.config\.ts$|README\.md$)|docs/|LICENSE$|NOTICE$|README\.md$|package\.json$)' -or
+                $member -match '(^|/)(\.kingdots|\.env(?:\.|$)|node_modules|tests|experiments|device-probe.mjs|hosting.json|secrets\.bin|kingdots\.sqlite|instance\.json|service\.lock)(/|\.|$)|(^|/)\.\.(/|$)') {
                 throw 'Generated package contains an unexpected or local-only member.'
             }
         }

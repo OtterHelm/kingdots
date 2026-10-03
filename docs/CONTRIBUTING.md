@@ -19,7 +19,7 @@ npm run build
 [deployment](deployment.md) for data directories and ports. Run checks appropriate
 to the change; behavioral changes need relevant regression coverage. Controlled
 tests use fixtures without provider model calls. `npm pack` runs validation and build.
-The historical `test:live` calls a provider, consumes usage and is excluded from CI.
+Prototype provider runners have been removed. Keep controlled fixtures outside the distribution.
 
 ## Submit a change
 

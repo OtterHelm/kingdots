@@ -103,7 +103,7 @@ export class LocalAppHost implements AppHostTransport {
         delete env[key];
       const client = new Client({
         name: "kingdots-app-host",
-        version: "0.1.3",
+        version: "0.1.4",
       });
       const transport = new StdioClientTransport({
         command: process.execPath,

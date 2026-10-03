@@ -9,9 +9,13 @@ import { defaultDataDir, runtime } from "./runtime.js";
 import { Vault } from "./vault.js";
 import { buildServer } from "./server.js";
 import { delay } from "./process.js";
-import { installLocalPlugin } from "./install-plugin.js";
-import { buildGateway } from "./gateway.js";
-import { tools } from "./tools.js";
+import { Store } from "./store.js";
+import {
+  migrateRelay,
+  relayConfigSchema,
+  validateRelayTarget,
+} from "./relay.js";
+import { randomBytes, createHash } from "node:crypto";
 
 const args = process.argv.slice(2);
 const dataIndex = args.indexOf("--data-dir");
@@ -25,7 +29,6 @@ interface Instance {
   url: string;
   id: string;
   createdAt: string;
-  gatewayUrl?: string;
 }
 async function instance(): Promise<Instance | null> {
   try {
@@ -111,7 +114,6 @@ async function serve() {
   }
   let rt: Awaited<ReturnType<typeof runtime>> | undefined;
   let app: ReturnType<typeof buildServer> | undefined;
-  let gateway: ReturnType<typeof buildGateway> | undefined;
   let closing = false;
   const close = async () => {
     if (closing) return;
@@ -119,9 +121,10 @@ async function serve() {
     // Fence dispatch before draining HTTP requests; an in-flight request must
     // not send while shutdown is waiting for its own response.
     rt?.events.stop();
+    const relayClosed = rt?.relay.close();
     const observerClosed = rt?.observer.close();
     await app?.close();
-    await gateway?.close();
+    await relayClosed;
     await observerClosed;
     await rt?.close();
     await unlink(instanceFile).catch(() => {});
@@ -139,21 +142,12 @@ async function serve() {
           void close();
         },
         observer: rt.observer,
-        gatewayAuth: rt.gatewayAuth,
+        relay: rt.relay,
       },
     );
     const url = await app.listen({
       host: "127.0.0.1",
       port: Number(process.env.KINGDOTS_PORT ?? 0),
-    });
-    gateway = buildGateway(
-      rt.gatewayAuth,
-      tools(rt.manager, rt.events, rt.observer),
-      rt.events,
-    );
-    const gatewayUrl = await gateway.listen({
-      host: "127.0.0.1",
-      port: Number(process.env.KINGDOTS_GATEWAY_PORT ?? 0),
     });
     await writeFile(
       instanceFile,
@@ -162,11 +156,11 @@ async function serve() {
         url,
         id: randomUUID(),
         createdAt: new Date().toISOString(),
-        gatewayUrl,
       } satisfies Instance),
       { mode: 0o600 },
     );
     rt.events.start();
+    rt.relay.start();
     process.once("SIGINT", () => {
       void close();
     });
@@ -177,6 +171,32 @@ async function serve() {
     await close();
     throw e;
   }
+}
+async function protectedInput(): Promise<string> {
+  return new Promise((accept, reject) => {
+    let value = "";
+    const terminal = Boolean(process.stdin.isTTY);
+    const finish = (error?: Error) => {
+      process.stdin.removeListener("data", onData);
+      process.stdin.removeListener("end", onEnd);
+      if (terminal) process.stdin.setRawMode(false);
+      process.stdin.pause();
+      error ? reject(error) : accept(value);
+    };
+    const onData = (chunk: string) => {
+      value += chunk;
+      if (Buffer.byteLength(value) > 65536 || value.includes("\u0003"))
+        finish(new Error("Configuration input rejected"));
+      else if (value.includes("\n") || value.includes("\r")) finish();
+    };
+    const onEnd = () => finish();
+    if (terminal) process.stdin.setRawMode(true);
+    process.stderr.write("Enter connection JSON on stdin (input hidden).\n");
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", onData);
+    process.stdin.once("end", onEnd);
+    process.stdin.resume();
+  });
 }
 async function main() {
   switch (args[0] ?? "help") {
@@ -212,19 +232,53 @@ async function main() {
       );
       break;
     }
-    case "gateway-configure": {
-      const originIndex = args.indexOf("--origin");
-      if (originIndex < 0 || !args[originIndex + 1])
+    case "relay-configure": {
+      if (await instance())
         throw new Error(
-          "Use gateway-configure --origin https://YOUR_GATEWAY_HOST",
+          "Stop the service before changing connection credentials",
         );
-      process.stdout.write(
-        JSON.stringify(
-          await api("/api/gateway/configure", {
-            origin: args[originIndex + 1],
-          }),
-        ) + "\n",
-      );
+      let input: any;
+      try {
+        input = JSON.parse(await protectedInput());
+      } catch {
+        throw new Error("Invalid connection JSON; input was not logged");
+      }
+      const config = relayConfigSchema.parse({
+        origin: input.origin,
+        watchId: input.watchId,
+        sessionId: input.sessionId,
+        enabled: input.enabled ?? false,
+      });
+      const vault = await Vault.open(join(dataDir, "secrets.bin"));
+      const store = new Store(join(dataDir, "kingdots.sqlite"));
+      try {
+        await migrateRelay(dataDir, store, vault);
+        validateRelayTarget(store, config);
+        if (input.serviceBearer !== undefined) {
+          if (typeof input.serviceBearer !== "string" || !input.serviceBearer)
+            throw new Error("Service credential required");
+          await vault.set("relayServiceBearer", input.serviceBearer);
+        }
+        if (!vault.get("relayServiceBearer"))
+          throw new Error("Service credential required");
+        if (!vault.get("relayPairToken"))
+          await vault.set(
+            "relayPairToken",
+            randomBytes(32).toString("base64url"),
+          );
+        store.put("settings", "relay_config", config);
+        process.stdout.write(
+          JSON.stringify({
+            configured: true,
+            enabled: config.enabled,
+            devicePairDigest: createHash("sha256")
+              .update(vault.get("relayPairToken")!)
+              .digest("hex"),
+          }) + "\n",
+        );
+      } finally {
+        store.close();
+      }
       break;
     }
     case "doctor": {
@@ -307,19 +361,11 @@ async function main() {
       await Promise.allSettled([...pending]);
       break;
     }
-    case "tunnel-guide":
-      process.stdout.write(
-        "Secure MCP Tunnel is disabled under the current no-API-billing requirement. Use kingdots install-plugin for a local stdio connection without a Platform API key. Actual Dots follow-up still requires end-to-end verification. See docs/dots-connection.md.\n",
-      );
-      break;
-    case "install-plugin":
-      process.stdout.write(
-        JSON.stringify(await installLocalPlugin(dataDir), null, 2) + "\n",
-      );
-      break;
     default:
+      if (args[0] && !["help", "--help", "-h"].includes(args[0]))
+        throw new Error("Unknown command. Run kingdots help.");
       process.stdout.write(
-        "kingdots · kingdots start | stop | status | doctor | open | mcp | install-plugin | gateway-configure --origin HTTPS_ORIGIN | tunnel-guide\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT; KINGDOTS_GATEWAY_PORT\n",
+        "kingdots · kingdots start | stop | status | doctor | open | mcp | relay-configure\nOptions: --data-dir PATH; KINGDOTS_HOME; KINGDOTS_PORT\n",
       );
   }
 }

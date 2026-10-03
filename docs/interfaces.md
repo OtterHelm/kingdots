@@ -39,6 +39,12 @@ Normal running observations do not continually emit attention events.
 
 ## MCP tools
 
+Provider adapter contract: `probe`, `list`, `read`, `close`. No adapter creates,
+prompts, resumes, interrupts or approves a coding session. Session metadata is
+always unowned; stored idle/not-loaded status does not establish external live
+idle state. Capability rows for removed execution features are unsupported.
+The Codex app-host transport is separate from these metadata adapters.
+
 | Tools                                              | Effect                                                                                     |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `watch_create`                                     | Register selected existing sessions without contacting or changing their workers           |
@@ -140,46 +146,16 @@ reconciling unknown delivery first. It clears old observations for a fresh host 
 Original sessions are not interrupted. Legacy task creation/execution returns `410`;
 historical task records remain readable.
 
-The local listener also exposes UI-only `GET /api/gateway`,
-`POST /api/gateway/configure`, `POST /api/gateway/approvals/:id` and
-`POST /api/gateway/grants/:id/revoke`. Only the authenticated local dashboard/API
-can configure the origin or approve/revoke grants. Local MCP uses its separate token
-at `/mcp`.
+Local MCP uses its separate token at /mcp. GET /api/relay/reviews is UI-token-only.
+GET /api/status includes relay configuration/enabled flags, connection health,
+last returned-review time, count and unknown-result count. GET /api/watches/:id
+includes correlated current-watch reviews. Imported historical reviews have no
+watch/session authority and appear only as unbound history.
 
-## OAuth gateway
+## Private Dots relay
 
-A separate loopback listener exposes discovery metadata, OAuth endpoints and
-`POST /mcp`, with no dashboard or `/api/*`. `gateway-configure` sets its external
-HTTPS origin. A separately deployed proxy forwards only this listener.
-
-Authorization uses a public client, exact supported ChatGPT HTTPS callback,
-resource-bound authorization code, S256 PKCE and the original browser's secure
-cookie. Pending consent lasts 10 minutes; codes last 2 minutes and are single-use.
-The user matches the displayed code in the local dashboard and chooses existing
-`app_host`/`codex-app` watches and a subset of requested scopes.
-
-| Scope                               | Gateway tools                                                                                                                            |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `kingdots:read`                     | `watch_list`, `watch_get`, `watch_host_read`, `events_read`, `capabilities_list`                                                         |
-| `kingdots:read` + `kingdots:manage` | Also `watch_poll`, `watch_instruction_prepare`, `watch_instruction_send`, `watch_pause`, `watch_release`, `watch_finish`, `decision_ack` |
-
-The gateway exposes 12 tools. `watch_host_read` requires read scope but updates
-observation/intervention records; its local MCP annotation is not read-only.
-Lists/events are filtered to consented watches; direct IDs and decision events are
-checked against that scope. Watch creation, manual observation/claim/receipt,
-provider-wide session browsing, resume and grant approval are not exposed.
-
-Access tokens last one hour; refresh tokens last seven days and rotate on use.
-Their hashes are persisted. Each watch has at most one active gateway management
-grant; this does not exclude local clients or lock the external host. Grant revocation
-invalidates tokens, pauses managed watches and stops that grant's subscriptions.
-Changing origin revokes prior grants. External connector/Dots compatibility is
-unverified; source behavior is not a certification of OAuth compliance.
-
-## Experimental Dots pull relay
-
-The separate source in `experiments/dots-pull-relay` is a connection-gate probe,
-not an extra set of local service tools. Its stateless HTTP `POST /mcp` supports
+The deployable source in `relay/` connects to the main-service transport in
+`src/relay.ts`. Its stateless HTTP `POST /mcp` supports
 initialization, static discovery and two tools:
 
 | Tool | Input | Result and boundary |
@@ -201,16 +177,34 @@ are `GET /device/jobs` (atomically claim one request and retrieve reviews),
 One queued/claimed inspection exists at a time. Identical command IDs return the
 original result. A claimed/unknown request is never automatically requeued.
 Conflicting results and changed duplicate reviews are rejected. Request/review
-records expire after 15 minutes; cleanup occurs on the next relay request. HTTP
-bodies are limited to 96 × 1024 decoded string units and serialized snapshots to
-72 × 1024 string units (UTF-8 byte sizes can be larger). The PC bounds
+payloads expire after 15 minutes; cleanup occurs on the next relay request and
+keeps request-ID tombstones to prevent a new execution under an expired ID. HTTP
+bodies are limited to 96 × 1024 UTF-8 bytes and serialized snapshots to
+72 × 1024 UTF-8 bytes. The PC bounds
 record text and explicitly marks truncation; it performs no model summarization.
 
-The finite PC helper preserves the selected paused watch and records requests
-before host reads. A judgment is correlated by inspection ID and nonce, but its
-authenticated account identity alone is not proof of actual Dots authorship.
-Actual tool activity must also be checked. These records do not update service
-review timestamps, activate management or satisfy the post-response review gate.
+The main-service connector journals requests before reads in `relay_jobs`.
+Jobs include ID/nonce, selected watch/session, ownership epoch, result and state:
+`claimed`, `result_prepared`, `delivered`, `delivery_unknown` or `host_unknown`.
+An uncertain claim/result is held rather than automatically resent. A released
+or completed watch is unavailable, and an epoch change during a read invalidates
+the prepared snapshot. Paused reads do not activate management.
+
+`relay_reviews` stores inspection ID/nonce, `continue_observation`, reason,
+authenticated-account source, selected watch/session/epoch and PC receipt time.
+Correlation and changed-content rejection precede storage; collection is
+acknowledged only after durable storage. Retries preserve the original timestamp.
+Account identity alone does not prove Dots authorship; actual tool activity must
+also be checked. Returned review time does not satisfy periodic/overnight acceptance.
+
+`relay-configure` reads origin/watch/session/enabled and optional serviceBearer
+from protected stdin while the service is stopped. Settings go to `relay_config`;
+credentials go to the main DPAPI vault. It neither selects another session from
+conversation text nor resumes management. It adds no new local MCP tools.
+
+Legacy sidecar records are imported once with null watch/session/epoch and
+`legacy: true`. Original files remain untouched. Such evidence is not assigned
+to a current watch or granted execution authority.
 
 ## Events
 

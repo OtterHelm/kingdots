@@ -1,7 +1,13 @@
 # Overnight supervision validation plan
 
+Implementation note (2026-10-04): this document preserves the agreed future
+acceptance plan. Current maintenance is restricted to consolidation and quality;
+regular-review/control additions are deferred. The private relay now shares the
+main service and database. The standalone PC OAuth gateway and finite probe were
+removed. Current executable behavior is documented in [connection](dots-connection.md).
+
 The current connection-gate experiment is the request-driven private relay in
-`experiments/dots-pull-relay`: Dots asks to read, the PC polls outward, and Dots
+`relay/`: Dots asks to read, the PC polls outward, and Dots
 returns a correlated no-action review. It adds no worker reporting or public PC
 tunnel. Its deployment/transport proof does not replace actual Dots tool activity
 or post-response acceptance. No instruction/approval tool is exposed in this probe.
@@ -132,9 +138,9 @@ judgment is needed, not for every healthy polling interval. No other coding chat
 or heartbeat acts as a substitute supervisor.
 
 The previously blocked temporary HTTPS launch is not part of this first route.
-Do not retry it through another shell or disable protection. The existing OAuth
-gateway remains an experimental fallback requiring its own working deployment
-and account-linking evidence; no new external connection is authorized by this plan.
+Do not retry it through another shell or disable protection. The standalone PC OAuth gateway was removed in 0.1.4. The existing private
+request-driven relay is the retained account path; no broader external access is
+authorized by this future acceptance plan.
 
 ## Gates, in order
 

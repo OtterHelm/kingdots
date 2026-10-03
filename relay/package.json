@@ -1,5 +1,5 @@
 {
-  "name": "kingdots-private-supervision-probe",
+  "name": "kingdots-relay",
   "private": true,
   "type": "module",
   "scripts": {

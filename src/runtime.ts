@@ -14,7 +14,7 @@ import { UnverifiedAppAdapter } from "./adapters/unverified.js";
 import type { Adapter } from "./adapters/types.js";
 import type { BackendId } from "./domain.js";
 import { LocalAppHost } from "./app-host.js";
-import { GatewayAuth } from "./gateway-auth.js";
+import { RelayConnector, migrateRelay } from "./relay.js";
 export function defaultDataDir() {
   if (process.env.KINGDOTS_HOME !== undefined)
     return resolve(process.env.KINGDOTS_HOME);
@@ -35,44 +35,19 @@ export async function runtime(dataDir = defaultDataDir()) {
     ["codex-app", new UnverifiedAppAdapter("codex-app")],
     ["claude-app", new UnverifiedAppAdapter("claude-app")],
   ]);
-  const manager = new Manager(store, adapters, dataDir, (backend) =>
-    backend === "codex-cli"
-      ? null
-      : "API billing is forbidden. Execution is disabled until a subscription or local model connection is independently verified; stored session reading remains available.",
+  const manager = new Manager(
+    store,
+    adapters,
+    dataDir,
+    () =>
+      "Only existing-session observation is available; worker execution and model API billing are disabled.",
   );
   const events = new Events(store, vault);
   const appHost = new LocalAppHost();
   const observer = new Observer(store, adapters, appHost);
-  const gatewayAuth = new GatewayAuth(store);
-  events.authorizeOwner = (owner) => {
-    if (owner === "dots") return true;
-    try {
-      const grant = gatewayAuth.grant(owner);
-      return !grant.revoked && grant.origin === gatewayAuth.origin;
-    } catch {
-      return false;
-    }
-  };
-  gatewayAuth.onRevoke = (grant) => {
-    for (const watchId of grant.watchIds) {
-      if (grant.scopes.includes("kingdots:manage")) observer.pause(watchId);
-    }
-    for (const sub of store.values<{
-      owner: string;
-      name: string;
-      taskId: string;
-      url: string;
-    }>("subscriptions"))
-      if (sub.owner === grant.id)
-        events.unsubscribe(
-          {
-            name: sub.name,
-            arguments: { taskId: sub.taskId },
-            delivery: { url: sub.url },
-          },
-          grant.id,
-        );
-  };
+  await migrateRelay(dataDir, store, vault);
+  const relay = new RelayConnector(store, vault, observer);
+  events.authorizeOwner = (owner) => owner === "dots";
   return {
     dataDir,
     vault,
@@ -81,9 +56,10 @@ export async function runtime(dataDir = defaultDataDir()) {
     events,
     observer,
     appHost,
-    gatewayAuth,
+    relay,
     async close() {
       events.stop();
+      await relay.close();
       await observer.close();
       await appHost.close();
       await manager.close();

@@ -2,26 +2,27 @@ import { mkdtemp, writeFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
-import { git } from "../src/workspace.js";
+import { fingerprint, git } from "../src/workspace.js";
 import { Store } from "../src/store.js";
 import { Manager } from "../src/manager.js";
 import { run } from "../src/process.js";
-import { unavailableUsage, type Task, type BackendId } from "../src/domain.js";
+import {
+  createTaskSchema,
+  unavailableUsage,
+  type Task,
+  type BackendId,
+} from "../src/domain.js";
 import {
   capabilities,
   type Adapter,
-  type AdapterEvent,
   type Session,
   type BackendInfo,
 } from "../src/adapters/types.js";
 export class FakeAdapter implements Adapter {
   readonly id = "codex-cli" as const;
-  onEvent: (e: AdapterEvent) => void = () => {};
   sends = 0;
   interrupts = 0;
   sessions = new Map<string, Session>();
-  onSend: (task: Task, attempt: number) => Promise<void> = async () => {};
-  emitResults = true;
   async probe(): Promise<BackendInfo> {
     return {
       id: this.id,
@@ -47,55 +48,25 @@ export class FakeAdapter implements Adapter {
       }
     );
   }
-  async create(task: Task) {
-    const session: Session = {
-      id: randomUUID(),
-      backend: this.id,
-      state: "idle",
-      owned: true,
-      project: task.worktree,
-      title: task.goal,
-    };
-    this.sessions.set(session.id, session);
-    return session;
-  }
-  async send(id: string, _prompt: string, commandId: string, task: Task) {
+  async create() {
     this.sends++;
-    this.sessions.get(id)!.state = "running";
-    if (this.emitResults)
-      setImmediate(() => {
-        void this.onSend(task, this.sends).then(() => {
-          this.sessions.get(id)!.state = "idle";
-          this.onEvent({
-            type: "completed",
-            sessionId: id,
-            nativeId: commandId,
-            status: "completed",
-            text: "Worker says done",
-            usage: unavailableUsage(),
-          });
-        });
-      });
-    return { nativeId: commandId };
+    throw new Error("Unexpected worker creation");
   }
-  async steer(id: string, prompt: string, task: Task) {
-    return this.send(id, prompt, randomUUID(), task);
+  async send() {
+    this.sends++;
+    throw new Error("Unexpected adapter send");
   }
-  async interrupt(id: string) {
+  async interrupt() {
     this.interrupts++;
-    const s = this.sessions.get(id);
-    if (s) s.state = "idle";
+    throw new Error("Unexpected adapter interrupt");
   }
-  async resume(task: Task) {
-    return this.read(task.sessionId!);
+  async steer() {
+    this.sends++;
+    throw new Error("Unexpected adapter steering");
   }
-  async executeCheck(
-    argv: string[],
-    task: Task,
-    timeoutMs: number,
-    signal: AbortSignal,
-  ) {
-    return run(argv, task.worktree!, timeoutMs, signal);
+  async resume() {
+    this.sends++;
+    throw new Error("Unexpected adapter resume");
   }
   async close() {}
 }
@@ -171,14 +142,52 @@ export async function waitFor(fn: () => boolean, timeout = 10_000) {
     await new Promise((r) => setTimeout(r, 30));
   }
 }
+// Saved legacy evidence fixture; no worker is created or executed.
 export async function repaired(f: Awaited<ReturnType<typeof fixture>>) {
-  f.adapter.onSend = async (task) => {
-    await writeFile(
-      join(task.worktree!, "math.mjs"),
-      "export const add = (a, b) => a + b;\n",
-    );
+  const now = new Date().toISOString();
+  const params = createTaskSchema.parse(f.input);
+  const task: Task = {
+    ...params,
+    id: randomUUID(),
+    state: "awaiting_decision",
+    revision: 1,
+    createdAt: now,
+    updatedAt: now,
+    worktree: f.project,
+    branch: null,
+    baseCommit: null,
+    baselineFingerprint: null,
+    sessionId: null,
+    epoch: 0,
+    automatic: false,
+    blockedReason: null,
+    lastHealthyAt: now,
+    lastDecisionAt: null,
+    recentAction: "Saved legacy result",
+    nextAction: "Review evidence",
+    checklist: [],
+    evidence: [
+      {
+        id: randomUUID(),
+        checkId: "tests",
+        label: "Saved tests",
+        argv: ["node", "--test"],
+        exitCode: 0,
+        stdout: "Fixture evidence",
+        stderr: "",
+        fingerprint: await fingerprint(f.project),
+        startedAt: now,
+        finishedAt: now,
+        passed: true,
+      },
+    ],
+    artifactEvidence: [],
+    usage: unavailableUsage(),
+    failureFingerprint: null,
+    failureCount: 0,
+    finalReport: null,
   };
-  const task = await f.manager.create(f.input);
-  await waitFor(() => f.store.getTask(task.id).state === "awaiting_decision");
-  return f.store.getTask(task.id);
+  f.store.saveTask(task);
+  f.store.event(task, "legacy_evidence_saved");
+  return task;
 }

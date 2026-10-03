@@ -2,96 +2,59 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { CodexAdapter } from "../src/adapters/codex.js";
-import type { Task } from "../src/domain.js";
-test("API billing authentication is refused before creating a worker", async () => {
-  for (const mode of ["apiKey", "amazonBedrock", "unknown"]) {
-    const adapter = new CodexAdapter(process.execPath, [
-      resolve("tests/fixtures/codex-wire.mjs"),
-      "--fixture-auth=" + mode,
+
+const adapter = () =>
+  new CodexAdapter(process.execPath, [
+    resolve("tests/fixtures/codex-wire.mjs"),
+  ]);
+
+test("concurrent metadata reads wait for one completed App Server initialization", async () => {
+  const client = adapter();
+  try {
+    const records = await Promise.all([
+      client.read("saved-fixture"),
+      client.read("active-fixture"),
     ]);
-    try {
-      await assert.rejects(
-        adapter.create({
-          worktree: process.cwd(),
-          scope: { allowedPaths: ["**"], allowNetwork: false },
-        } as Task),
-        /requires existing ChatGPT sign-in/,
-      );
-    } finally {
-      await adapter.close();
-    }
-  }
-});
-test("authentication changing to API billing is refused before a subsequent turn", async () => {
-  const adapter = new CodexAdapter(process.execPath, [
-    resolve("tests/fixtures/codex-wire.mjs"),
-    "--fixture-auth=change",
-  ]);
-  try {
-    const task = {
-      worktree: process.cwd(),
-      scope: { allowedPaths: ["**"], allowNetwork: false },
-    } as Task;
-    const session = await adapter.create(task);
-    await assert.rejects(
-      adapter.send(session.id, "Do work", "blocked", task),
-      /requires existing ChatGPT sign-in/,
+    assert.deepEqual(
+      records.map((record) => record.id),
+      ["saved-fixture", "active-fixture"],
     );
   } finally {
-    await adapter.close();
+    await client.close();
   }
 });
-test("steering waits for startup and respects a revoked write signal", async () => {
-  const adapter = new CodexAdapter(process.execPath, [
-    resolve("tests/fixtures/codex-wire.mjs"),
-  ]);
+test("stored Codex metadata does not establish live idle state or ownership", async () => {
+  const client = adapter();
   try {
-    const task = {
-      worktree: process.cwd(),
-      scope: { allowedPaths: ["**"], allowNetwork: false },
-    } as Task;
-    const session = await adapter.create(task);
-    await adapter.send(session.id, "No edits", "command-1", task);
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 30);
-    await assert.rejects(
-      adapter.steer(session.id, "Extra guidance", task, controller.signal),
-      /canceled before dispatch/,
-    );
-    const result = await adapter.steer(session.id, "Scoped guidance", task);
-    assert.equal(result.nativeId, "fixture-turn");
-    await adapter.interrupt(session.id);
+    const sessions = await client.list();
+    assert.equal(sessions.length, 1);
+    assert.equal(sessions[0].state, "unknown");
+    assert.equal(sessions[0].owned, false);
+    const stored = await client.read("saved-fixture");
+    assert.equal(stored.state, "unknown");
+    assert.equal(stored.owned, false);
+    const active = await client.read("active-fixture");
+    assert.equal(active.state, "running");
+    assert.equal(active.owned, false);
   } finally {
-    await adapter.close();
+    await client.close();
   }
 });
-test("cancellation waits for the accepted turn to become active; an idle queued history is insufficient", async () => {
-  const adapter = new CodexAdapter(process.execPath, [
-    resolve("tests/fixtures/codex-wire.mjs"),
-  ]);
-  const events: unknown[] = [];
-  adapter.onEvent = (e) => events.push(e);
+test("read-only Codex client refuses a server approval request", async () => {
+  const client = adapter();
   try {
-    const task = {
-      worktree: process.cwd(),
-      scope: { allowedPaths: ["**"], allowNetwork: false },
-    } as Task;
-    const session = await adapter.create(task);
-    const started = Date.now();
-    await adapter.send(session.id, "No edits", "command-1", task);
-    await adapter.interrupt(session.id);
-    assert.ok(Date.now() - started >= 200);
-    assert.ok(
-      events.some(
-        (e: any) => e.type === "completed" && e.status === "interrupted",
-      ),
-    );
-    assert.equal((await adapter.read(session.id)).state, "idle");
-    assert.equal(
-      (await adapter.resume({ ...task, sessionId: session.id })).owned,
-      true,
-    );
+    const record = await client.read("approval-fixture");
+    assert.equal(record.title, "Permission refused");
   } finally {
-    await adapter.close();
+    await client.close();
+  }
+});
+test("metadata errors are correlated to the requested read without starting another session", async () => {
+  const client = adapter();
+  try {
+    await assert.rejects(client.read("missing-fixture"), /not found/);
+    assert.equal((await client.read("saved-fixture")).id, "saved-fixture");
+  } finally {
+    await client.close();
   }
 });

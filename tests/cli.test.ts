@@ -5,6 +5,55 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { run, killTree, delay } from "../src/process.js";
 import { defaultDataDir } from "../src/runtime.js";
+import { spawn } from "node:child_process";
+
+test("malformed connection input is rejected without printing its contents", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kingdots-stdin-"));
+  const privateInput = "fixture-sensitive-configuration-value";
+  try {
+    const child = spawn(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve("src/cli.ts"),
+        "relay-configure",
+        "--data-dir",
+        root,
+      ],
+      { windowsHide: true, stdio: ["pipe", "pipe", "pipe"] },
+    );
+    let output = "";
+    child.stdout.on("data", (data) => (output += data));
+    child.stderr.on("data", (data) => (output += data));
+    const done = new Promise<number | null>((accept, reject) => {
+      child.once("error", reject);
+      child.once("close", accept);
+    });
+    child.stdin.end(privateInput + "\n");
+    assert.equal(await done, 1);
+    assert.match(output, /Invalid connection JSON/);
+    assert.ok(!output.includes(privateInput));
+    const removed = await run(
+      [
+        process.execPath,
+        "--import",
+        "tsx",
+        resolve("src/cli.ts"),
+        "install-plugin",
+        "--data-dir",
+        root,
+      ],
+      process.cwd(),
+      10000,
+    );
+    assert.equal(removed.exitCode, 1);
+  } finally {
+    if (!resolve(root).startsWith(resolve(tmpdir(), "kingdots-stdin-")))
+      throw new Error("Unsafe fixture cleanup");
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 test("default storage preserves existing preview data and respects explicit paths", async () => {
   const root = await mkdtemp(join(tmpdir(), "kingdots-path-"));
