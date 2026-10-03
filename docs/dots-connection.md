@@ -30,14 +30,28 @@ authorization. No model API key or paid setup is part of the probe.
 
 Private deployment, authenticated outbound device access and unauthenticated
 access rejection have been checked. Plugin discovery/installation is a separate
-account step. Actual Dots inspection, its no-action callback and a check-in after
-its initial response ends remain independent gates; platform account identity
-alone cannot certify Dots's authorship. Leave the selected watch paused during
+account step. One bounded actual Dots inspection and no-action callback returned
+to the PC. Two one-time checks after its initial response also returned judgments;
+platform account identity alone cannot certify Dots's authorship. Leave the selected watch paused during
 this read-only gate. The probe has no session-send or permission-approval tool.
 
 Use the [probe source and reproduction instructions](../experiments/dots-pull-relay/README.md).
 The installed 18-tool local plugin is unchanged by connecting this separate
 two-tool private plugin. No automatic management claim follows from deployment.
+
+The Codex-local plugin is an optional diagnostic client for the PC service. The
+tested Dots pull path does not depend on it: its PC helper calls the service's
+loopback API and the actual Dot calls the separate private account plugin. The
+prototype currently has those two entries; the account plugin still carries its
+probe name. Do not mistake the Codex-local installation for account connection.
+
+The actual Dot scheduled two one-time checks in its existing conversation and
+ended its initial reply. Both later inspections and no-action judgments reached
+the PC without another user message in that Dot or worker notification. The
+scheduled times and observed delays are in [dated verification](verification-results.md).
+This qualifies the bounded scheduled read/return path, not exact timing, ongoing
+15-minute reviews, safe session instructions or overnight operation. MCP Events
+has not been deployed in this probe.
 
 For the private plugin, check ChatGPT → Plugins → Personal → Created by you.
 Install the provisioned plugin and connect its linked app. Confirm both its
@@ -71,14 +85,14 @@ calls. Installation alone is not proof that Dots exposes or invokes the tools.
 
 See [deployment](deployment.md) for environment, ports and restart procedures.
 
-## Experimental existing-app attention path
+## Earlier existing-app attention experiments
 
-The current connection-gate check found no kingdots read/decision tools in actual
+The earlier connection-gate check found no kingdots read/decision tools in actual
 Dots. Version 0.1.3 repairs the local callback's watch lookup and permits explicit
 reads of paused watches without enabling management. These changes prepare the
 existing MCP path; they do not expose it to Dots or pass the connection gate.
 
-The smallest external alternative remains forwarding only the isolated OAuth
+An earlier external alternative was forwarding only the isolated OAuth
 gateway over an authenticated HTTPS MCP connection. Records and host control stay
 on the PC. Limit an initial grant to the selected existing watch; verify a live
 read and decision callback before follow-up delivery. The dashboard and local API
@@ -196,7 +210,8 @@ relay to read the selected existing Windows Codex conversation and verify its
 running state. A follow-up preparation was correctly rejected while it was active.
 No live instruction was sent. This local proof does not substitute for an actual
 Dots call or for durable host context after the caller's response ends.
-The external OAuth route has not been deployed or connected to the user's account.
+The standalone PC OAuth gateway has not been externally deployed or connected
+to the user's account; the separate private relay result is described above.
 
 Use supported MCP Events or an actually supported Dots check-in. For the existing
 event contract, subscribe to `task.attention_required`/`task.completed` using

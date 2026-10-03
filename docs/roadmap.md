@@ -15,21 +15,30 @@ selected local conversation passed on Windows, with active-session sending block
 Actual Dots compatibility and live idle-session sending remain unverified.
 
 Version 0.1.3 fixes watch-event decision acknowledgments and permits explicit
-paused/released app-host reads without changing management. The latest real Dots
-discovery still lacks kingdots read/decision tools. These are prerequisite fixes;
-the approved 15-minute configurable proactive review loop and safe automatic
-recovery are gated on that connection and are not implemented yet.
+paused/released app-host reads without changing management. Before the private
+account plugin was connected, Dots discovery lacked kingdots read/decision tools.
+The approved 15-minute configurable proactive review loop and safe automatic
+recovery are not implemented yet.
 
 An owner-private request-driven MCP relay now exists as a source-only connection
 experiment. Deployment and authenticated outbound PC access passed. It exposes
 only original-session inspection and a correlated no-action judgment, without
-worker notifications or public PC ingress. The actual Dot must be connected and
-assigned the initial test directly by the human. Dots tool use, decision return,
-post-response checks and safe session instructions are still separate gates.
+worker notifications or public PC ingress. The human connected the actual Dot
+and assigned the initial test directly. Its original-session read and correlated
+no-action judgment returned to the PC. Safe session instructions remain a
+separate gate; this is not overnight-management acceptance.
+
+Two native one-time checks in the same actual Dot conversation then passed after
+its initial reply, without further user messages or worker notifications. Both
+judgments were collected by the PC; scheduling delays were measured. The bounded
+scheduled read/return gate is now passed. Configurable ongoing reviews, safe
+session control, recovery and overnight acceptance remain pending. The Codex-local
+plugin is optional for this path; a unified account-plugin installer/name is still
+release work rather than a reason to require both clients.
 
 Bounded native app messages now have actual Dots receipt and user-facing reply
 evidence. The read/wait return path omits those replies. The next connectivity
-trial is Dots's own existing-task follow-up tool against the selected local Codex
+trial used Dots's own existing-task follow-up tool against the selected local Codex
 conversation. One finite program passed post-response reads and attention
 dispatch, but did not verify correlated guidance and a marker reply within five
 minutes. Local-target sending and sustained/restarted background operation remain
@@ -51,13 +60,13 @@ targets five minutes, and safe same-conversation resumption is allowed after
 confirmed owner exit. The five requested products remain the eventual support
 goal; their independent capabilities are not promised before actual trials.
 
-1. Verify actual Dots reads and durable no-action decision return through a supported
-   local or external OAuth route, then authorized same-session sends and host context
-   after the caller ends.
+1. Actual Dots reads, durable no-action return and two native one-time post-response
+   checks passed through the private account plugin. Next verify authorized
+   same-session sends and durable host context across longer operation.
    Keep package/plugin/protocol versions aligned for release. Establish the host
    ownership boundary; idle preflight is not an atomic host reservation.
-2. Verify a supported event or Dots check-in that wakes the actual dot after its
-   initial response ends without an API-key supervisor or another user message.
+2. Extend the bounded native check-in proof to ongoing configured review timing
+   and urgent attention without an API-key supervisor or another user message.
 3. Run the overnight acceptance on an already-working selected session: healthy
    observation, scoped question, error/stop, same-session follow-up, fresh test/artifact
    evidence and final user report. Verify pause/intervention/uncertain delivery.

@@ -7,6 +7,57 @@ local storage; public documentation contains no account IDs or callback secrets.
 
 ## Request-driven private relay probe: 2026-10-03
 
+### Actual Dots post-response checks: service/plugin 0.1.3, public base `a6f2337`
+
+The human asked the existing actual Dot to schedule two one-time reads and
+no-action judgments, then sent no further message in that Dot. Its initial reply
+reported two reservations and ended. Two later replies appeared in that same
+conversation. The PC journal independently received both correlated judgments.
+
+| Check | Scheduled time (KST) | Observed host read (KST) | PC received judgment (KST) | Read delay |
+| ----- | -------------------- | ------------------------ | -------------------------- | ---------- |
+| First post-response check | 23:12:44 | 23:13:23 | 23:13:40 | 39 seconds |
+| Second post-response check | 23:14:47 | 23:18:31 | 23:18:47 | 3 minutes 44 seconds |
+
+Including the initial manual assignment, the journal contained **three distinct
+delivered reads and three matching reviews**. Each inspection ID/nonce matched,
+each original session/project matched, and each host snapshot reported `running`
+with truncation marked. No observation was stored into the paused watch. The watch
+remained paused/nonautomatic and its command journal contained zero entries.
+There were no worker-to-Dots messages, program model calls, additional AI sessions
+or coding instructions. UI installed-plugin inspection showed the private account
+plugin; the separate Codex-local plugin is not a dependency of this tested path.
+
+This passes **two bounded actual Dots scheduled read/decision returns after its
+initial response**, not accurate 1/3-minute execution or the five-minute question
+intervention objective. Ongoing 15-minute reviews, active session instructions,
+restart recovery and overnight completion remain unverified. The finite PC
+transport stopped at its configured expiry; no ongoing supervision was enabled.
+Controlled fixture/CI results are unchanged, and this is not a new security audit.
+
+### Actual Dots first round trip: service/plugin 0.1.3, public base `a6f2337`
+
+After installation and connection, the human assigned the bounded read/no-action
+test directly to the already-existing actual Dot. The Dot's frontend response
+reported the inspection call and matching judgment call; the human separately
+relayed the same response. The durable PC journal contained **one delivered
+read and one correlated returned review**. No fixture or worker-originated
+notification initiated these calls.
+
+The PC claimed the read at **23:02:15 KST** and captured the original local host
+record within the same second. It received the correlated judgment at
+**23:02:36 KST**. The record matched the enrolled original session/project and
+reported `running`; `observationStored` was false. Truncation was explicitly
+marked. The review's inspection ID and nonce matched the delivered read and its
+decision was `continue_observation`. Private identifiers and content remain local.
+
+The selected watch stayed paused, automatic management stayed off, and its
+command journal remained empty. Program model calls and worker-to-Dots messages
+were zero. This passes the bounded actual Dots **read + decision-return** gate.
+It does not pass post-response scheduled review, safe coding instructions,
+five-minute intervention or overnight acceptance. A two-check post-response
+trial was requested separately through the human's existing Dot conversation.
+
 ### Installation follow-up: service/plugin 0.1.3, public base `4100ae9`
 
 After the user reported installation, the actual ChatGPT interface showed the
@@ -40,7 +91,7 @@ probe working tree contains the same relay protocol and a portable fixture path.
 | Finite PC transport | Connected outward; no session read occurred without a Dots request |
 | Windows local CI | Existing pipeline passed typecheck, 57 service tests plus 5 relay fixtures, build, package and unchanged-source check; reused root dependencies with `-SkipInstall` |
 | Existing watch | Preserved paused and nonautomatic; no session instruction or worker notification |
-| Actual Dots inspection and judgment | Not yet verified; the user relayed Dots's missing-tool reply, and the native account permission check confirmed the private plugin was not installed. No read or review was recorded |
+| Actual Dots inspection and judgment at the initial attempt | No call: the user relayed Dots's missing-tool reply, and a generic permission query reported `not_installed`. Later installation and actual-call results are recorded separately above |
 | Post-response and overnight supervision | Not verified; regular reviews and coding control are not implemented by this probe |
 
 No model API key, payment configuration, additional coding session or public PC

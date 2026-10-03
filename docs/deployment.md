@@ -7,6 +7,12 @@ its returned project ID in an ignored local hosting manifest, preserve the
 owner-only audience and publish only a matching pushed source/archive. Use
 generated D1 migrations; do not create schema in request handlers.
 
+For this tested pull path, run the PC service and connect the provisioned account
+plugin. The separate `install-plugin` command registers an optional Codex-local
+diagnostic client; it is not a prerequisite of the outward PC helper. Current
+account-plugin provisioning remains an experiment rather than an automated
+single-plugin installer.
+
 The PC transport polls outward and requires no public PC listener or tunnel.
 Keep its provisioned Sites service credential and device pairing token in a
 separate current-user Windows DPAPI vault; configure only the pairing digest as

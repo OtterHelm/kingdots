@@ -114,13 +114,22 @@ Set-Location kingdots
 npm ci
 npm run build
 node dist/cli.js start
-node dist/cli.js install-plugin
 node dist/cli.js open
 ```
 
 The service runs under the current user's permissions and binds to `127.0.0.1` on
 an available port. `open` launches the authenticated local dashboard. The current
 dashboard uses Korean labels.
+
+The separate Codex-local plugin is optional for local diagnostics:
+
+```powershell
+node dist/cli.js install-plugin
+```
+
+The tested Dots pull path uses the PC service and its provisioned account plugin.
+It does not require this additional Codex-local management plugin. Connect the
+account plugin using the [connection guide](docs/dots-connection.md).
 
 For `app_host`, start the service from an existing Codex chat's executor so it
 inherits real app context. An already-running service keeps its original
@@ -232,7 +241,9 @@ An experimental [request-driven relay](experiments/dots-pull-relay/README.md)
 lets Dots request an original-session read through an owner-private MCP plugin;
 the PC polls outward and returns records without worker reports or a public PC
 endpoint. Its two tools are limited to inspection and a no-action review. It is
-separate from the 18-tool local plugin and requires actual Dots connection testing.
+separate from the optional 18-tool local plugin. Bounded actual Dots reads,
+judgment return and one-time checks after its initial response passed. Regular
+review timing, session control and overnight operation still require validation.
 
 The signed event outbox uses `task.attention_required` and `task.completed`, with
 `taskId` holding the watch ID for compatibility. See the
