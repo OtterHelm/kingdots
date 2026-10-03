@@ -30,7 +30,8 @@ unverified. See [dated results](verification-results.md).
 
 Proactive observation remains the user's requirement: Dots starts looking at the
 selected existing sessions using automatically collected host records. Coding
-AIs must not spend tokens composing status reports. A reliable dashboard and Dots
+AIs must not compose status reports, notify Dots or run reporting scripts. The
+collector reads existing records under Dots's supervision. A reliable dashboard and Dots
 information delivery can be intermediate milestones, but they do not replace
 the required actual Dots management loop. Narrow the first real trial to Codex
 app before expanding providers or the interface.

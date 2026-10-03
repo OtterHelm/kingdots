@@ -5,6 +5,23 @@ performed on 2026-10-02. Results describe the tested installation or working tre
 not universal support. Raw account, session and machine records stay in ignored
 local storage; public documentation contains no account IDs or callback secrets.
 
+## Worker-reporting constraint clarification: 2026-10-03
+
+The 0.1.3 documentation/skill working tree based on `1d01aff` makes the user's
+constraint explicit: coding sessions must not send reports or notifications to
+Dots, call supervision tools for that purpose or run reporting scripts. Existing
+questions and tool output remain observable input. Regular healthy-work reviews
+must not depend on worker notifications. This changes guidance and acceptance
+criteria, not the service's connection or review implementation.
+
+The official skill validator passed using isolated local validation dependencies.
+Both README structures and JSON examples matched, relative documentation links
+resolved, `git diff --check` passed and changed files contained none of the known
+private values checked by the local validation script. These are documentation
+and packaging checks, not a new security audit or actual Dots acceptance. No
+session message, account change or external connection was performed for this
+clarification; the proactive connection/review gate remains unverified.
+
 ## Actual Dots message probe: 2026-10-03
 
 ### Implementation connection gate and local fixes: 0.1.3 working tree

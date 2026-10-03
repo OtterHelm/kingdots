@@ -27,12 +27,19 @@ record of what needs attention and what was actually delivered.
 - **Continue the selected work.** Keep the existing sessions, projects, branches
   and worktrees; the public workflow does not launch replacement sessions.
 - **Inspect ongoing work proactively.** Dots should assess existing session activity
-  without asking coding AIs for status reports. Healthy execution continues while
+  without asking coding AIs for status reports or notifications to Dots. Healthy
+  execution continues while
   its direction is reviewed; questions, errors and stopped responses need earlier attention.
 - **Record before sending.** Retain the exact prompt, reason, observation, ownership
   epoch and command ID. An uncertain send stays locked rather than being blindly retried.
 - **Completion needs evidence.** Idle alone is insufficient. Dots inspects fresh
   test or artifact evidence for every original completion condition.
+
+Coding sessions must not initiate supervision, call kingdots to report their own
+status, message Dots with updates or run notification scripts. Dots initiates
+reviews; kingdots collects existing host state and records without asking workers
+to produce new messages. Service-generated attention events are derived from
+those observations and do not replace regular Dots reviews of healthy work.
 
 ## What is implemented
 

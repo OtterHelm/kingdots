@@ -6,6 +6,13 @@ resume external provider processes or approve permissions. The `app_host` bridge
 can read and send to an enrolled local Codex app conversation through installed
 official app tools. Dots remains the decision-maker.
 
+Observation and decision tools belong to Dots's supervision workflow. Coding
+sessions must not invoke them to report their own status, notify Dots or run a
+reporting relay. The collector reads existing host records and creates attention
+events from observed state; workers are not asked to produce supervision messages.
+An ordinary question or tool result in the original session can be observed
+without becoming a worker-to-Dots notification or granting authority.
+
 ## Watch record
 
 `watch_create` requires `goal`, `sessions`, `completionConditions`, `allowedFollowUp`

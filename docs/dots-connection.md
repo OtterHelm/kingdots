@@ -4,6 +4,13 @@ The local plugin and experimental OAuth gateway supply kingdots records and
 attention events. Dots remains the supervisor. Host access can use the local
 `app_host` bridge or Dots's own verified tools on the `dots_host` path.
 
+Coding sessions do not initiate this connection or send reports/notifications to
+Dots. Dots enrolls and reviews the user-selected sessions using existing records;
+the collector supplies observations and derived attention events. Never instruct
+a worker to call supervision tools or run a reporting script. The historical
+message probes below were separate connection tests, not a worker reporting
+workflow or evidence that periodic Dots supervision is implemented.
+
 ## Local setup
 
 1. Build the checkout, start the local service and run `kingdots install-plugin`

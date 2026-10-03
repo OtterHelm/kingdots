@@ -11,7 +11,10 @@ guides recoverable failures, checks completion evidence and reports the outcome.
 kingdots collects, relays and journals; it does not provide a judgment model.
 
 Dots initiates observation of the selected sessions; coding AIs are not asked to
-write status reports or send their own supervision requests. The local program
+write status reports, send notifications or send their own supervision requests.
+Workers must not call supervision tools or run reporting/notification scripts.
+Ordinary questions in the original session are observed without asking the worker
+to forward them to Dots. The local program
 collects existing host state, conversation, activity, errors and verification
 records without a model call. Dots judges when intervention is needed and guides
 the original sessions. A dashboard and information delivery are intermediate
@@ -159,7 +162,8 @@ trials, use a known trigger time. Report detection-to-action separately when the
 original occurrence time cannot be established; do not silently treat it as the
 complete five-minute measurement.
 
-Unchanged healthy work should not repeatedly invoke Dots. Repeated attention and
+Unchanged healthy observations should not trigger extra urgent Dots reviews, but
+the agreed regular content reviews still run. Repeated attention and
 decisions use stable IDs and persistent cursors. Unknown delivery remains held
 until its original host outcome can be verified. Three repeated errors without
 progress stop automatic execution and report the reason.
@@ -208,7 +212,8 @@ connection prerequisites, not a completed automatic supervisor.
 After the gate passes, implement `reviewIntervalMs`, one outstanding review per
 watch, durable review IDs/epochs/observation references, structured decision
 recording and due/late timestamps. Normal running work also requests Dots review;
-worker-authored summaries are never required. Expand host content access as needed
+worker-authored summaries addressed to Dots and worker-to-Dots notifications are
+prohibited. Expand host content access as needed
 with explicit truncation and source references. Add verified active follow-up
 capabilities, fresh command/exit/log/artifact completion checks and recovery
 reconciliation next. Then run real unattended acceptance and qualify other products.

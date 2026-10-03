@@ -59,6 +59,12 @@ same-session follow-up, actual fresh evidence and a final user report without an
 additional user message or newly created session. Until independently observed,
 unattended supervision must remain unverified.
 
+Proactive acceptance must succeed while coding sessions send no reports or
+notifications to Dots and invoke no supervision/reporting scripts. Test regular
+reviews during healthy running work and urgent reviews using ordinary questions,
+errors and completion evidence already present in the original session. A worker
+reporting to Dots cannot substitute for the collector observing that state.
+
 See [dated results](verification-results.md) for the actual pass/fail outcome of
 each tested version or working tree. Test coverage listed here is not a claim that
 the current suite passes.
