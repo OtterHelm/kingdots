@@ -10,6 +10,8 @@ reservations, uncertain delivery, intervention, pause during dispatch, shutdown,
 restart and fresh completion-condition references. Public MCP cannot approve
 permissions or resume management. UI and MCP credentials have separate roles;
 Host and Origin checks reject browser cross-site commands.
+Security regressions additionally reject encoded route aliases without the proper
+UI/MCP token and cancel oversized input/output streams before fully buffering them.
 
 Relay regressions cover request-driven reads, nonce/target correlation, changed
 review rejection, unchanged paused watches, held unknown result delivery, release

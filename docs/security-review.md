@@ -1,5 +1,83 @@
 # Security and publication review
 
+## 2026-10-04 — 0.1.5 security and publication review
+
+Reviewed the 0.1.5 working tree based on `493d4cb572ec2fff01d64bf684cb2ce2f6b390ab`.
+This covers source authentication, bounded transport, dependency advisories,
+current source, reachable history, packaged files and available public Actions
+logs. It is a scoped review, not an independent penetration test.
+
+### Confirmed issues and fixes
+
+1. **Encoded local-route authentication bypass.** In 0.1.4, the authentication
+   hook classified the raw URL while Fastify could route an encoded spelling to
+   the same handler. An isolated unauthenticated API read returned 200, and an
+   encoded spelling could change which UI/MCP token was expected. Version 0.1.5
+   authenticates Fastify's matched route. The regression failed before the fix
+   and passes after it, including token-role separation and permitted valid calls.
+   This affects clients that can reach the local listener; loopback binding is
+   not authentication. Replace older running builds. The installed 0.1.5 service
+   rejects unauthenticated encoded API and MCP requests with 401.
+2. **Transport byte limits were applied after full buffering.** Request/response
+   size checks rejected large bodies only after reading them. Controlled streams
+   demonstrated consumption of their entire oversized contents. The relay now
+   cancels input beyond 96 KiB, and the PC cancels responses beyond 128 KiB while
+   reading. Regressions cover a dishonest Content-Length and early cancellation.
+   Relay audience, pairing and target scope are unchanged.
+3. **Schema-tool development dependency advisory.** The relay lockfile included
+   esbuild 0.18.20 through the deprecated esbuild-kit chain. npm reported four
+   affected-package entries for one moderate advisory,
+   [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99).
+   A targeted override pins nested esbuild to 0.25.12. A clean lockfile/install
+   resolved the stale nested entry; schema generation passed with no migration
+   change. Both root and relay audits now report zero known advisories, and CI
+   audits both lockfiles. This was development tooling, not a model API runtime.
+4. **Runner identifiers in public CI logs.** Source/history/package checks found
+   no known personal values, but 21 of 22 available Actions logs contained the
+   PC name, Windows account name and home path. No known key/token, Codex session
+   ID or app pipe matched in those logs. The owner approved deletion of those
+   public logs and encrypted repository masking values, with local backups and
+   run results preserved. Actual cleanup and new-job masking results are recorded
+   in [verification results](verification-results.md). A privacy-ready variable
+   gates self-hosted jobs so an unconfigured runner does not emit new metadata.
+   Masks must be present before job setup; a later step cannot erase earlier logs.
+
+### Publication checks
+
+- Gitleaks 8.30.1, downloaded from its official release with a matching published
+  checksum, found no credential-signature leak in all 22 reachable commits, the
+  proposed source or 22 available Actions logs. Scans run locally with redacted
+  output; raw records are not uploaded by the scanner.
+- A separate comparison checked available local vault credentials and Codex
+  authentication values, private connection IDs/email, registered-session IDs,
+  PC/account identifiers and personal paths. No matches in 78 source files,
+  306 unique history blobs or the 92-member package. Synthetic URL-authority
+  email candidates in test fixtures were reviewed; they are not actual contacts.
+- Git authors/committers use GitHub noreply addresses. License attribution is
+  retained. GitHub secret scanning and push protection are enabled, with zero
+  open secret-scanning alerts at the check. Non-provider patterns/validity checks
+  and automatic Dependabot security updates were not enabled by this work.
+- The inspected Windows database/vault ACLs had no allow rule for Everyone,
+  built-in Users or Authenticated Users. This is evidence for that installation,
+  not every custom data directory.
+
+### Remaining boundaries
+
+Known-advisory checks and these regressions cannot guarantee absence of every
+vulnerability or unknown personal value. No independent penetration test, broad
+fuzzing campaign or complete third-party/platform audit was performed. Same-user
+processes can decrypt DPAPI; local conversation records are plaintext and may
+contain private text. Authorized relay snapshots cross a private hosting boundary
+and masking is not complete anonymization. Authenticated account provenance does
+not independently prove Dots authorship. Human authorization remains an assertion
+for trusted clients, and follow-up scope is not a semantic prompt sandbox.
+
+App-host preflight and send are not an atomic host reservation. Unknown delivery,
+other providers and actual unattended Dots control remain separately unverified.
+The security upgrade preserves explicit pauses and original sessions.
+
+## Earlier review records
+
 This records the 0.1.0 source/publication review. Version 0.1.1 changes the public
 workflow to existing-session observation: worker creation/execution is disabled,
 permission decisions remain in the original host, and completion evidence is

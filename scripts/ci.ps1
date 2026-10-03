@@ -88,6 +88,8 @@ try {
         }
 
         if (-not $SkipInstall) { Invoke-NpmStep 'install' @('ci', '--include=dev') }
+        Invoke-NpmStep 'dependency-audit' @('audit', '--json')
+        Invoke-NpmStep 'relay-dependency-audit' @('--prefix', 'relay', 'audit', '--json')
         Invoke-NpmStep 'typecheck' @('run', 'typecheck')
         Invoke-NpmStep 'tests' @('test')
         Invoke-NpmStep 'build' @('run', 'build')

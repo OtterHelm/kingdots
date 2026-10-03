@@ -181,6 +181,75 @@ test("UI and MCP credentials have separate roles; host and origin checks prevent
     await f.cleanup();
   }
 });
+
+test("encoded route aliases cannot bypass tokens or swap UI and MCP roles", async () => {
+  const f = await fixture();
+  const app = buildServer(
+    f.manager,
+    new Events(f.store, { get: () => undefined, set: async () => {} }),
+    { ui: "fixture-ui", mcp: "fixture-mcp" },
+  );
+  try {
+    for (const [url, method] of [
+      ["/%61pi/watches", "GET"],
+      ["/api/%77atches", "GET"],
+      ["/%6dcp", "POST"],
+      ["/%61pi/mcp-tools/watch_list", "POST"],
+    ] as const) {
+      const result = await app.inject({
+        url,
+        method,
+        ...(method === "POST"
+          ? { payload: { id: 1, method: "tools/list" } }
+          : {}),
+      });
+      assert.equal(result.statusCode, 401, url);
+    }
+    assert.equal(
+      (
+        await app.inject({
+          url: "/api/%6dcp-tools/watch_list",
+          method: "POST",
+          headers: { authorization: "Bearer fixture-ui" },
+          payload: {},
+        })
+      ).statusCode,
+      401,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          url: "/%61pi/watches",
+          headers: { authorization: "Bearer fixture-mcp" },
+        })
+      ).statusCode,
+      401,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          url: "/%61pi/watches",
+          headers: { authorization: "Bearer fixture-ui" },
+        })
+      ).statusCode,
+      200,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          url: "/api/%6dcp-tools/watch_list",
+          method: "POST",
+          headers: { authorization: "Bearer fixture-mcp" },
+          payload: {},
+        })
+      ).statusCode,
+      200,
+    );
+  } finally {
+    await app.close();
+    await f.cleanup();
+  }
+});
 test("MCP publishes tools and protocol-specific event capabilities with no user approval tool", async () => {
   const f = await fixture();
   const app = buildServer(

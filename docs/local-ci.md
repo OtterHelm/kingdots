@@ -29,13 +29,34 @@ kingdots 전용 runner는 다른 저장소의 runner와 별도로 등록하고 �
 
 1. Git 커밋과 원본 파일 상태 확인.
 2. `npm ci --include=dev`로 잠긴 의존성 설치.
-3. `npm run typecheck`.
-4. `npm test`.
+3. 본 서비스와 중계 lockfile에 각각 `npm audit --json`을 실행합니다.
+4. `npm run typecheck`.
+5. `npm test`.
    기존 서비스 검사와 요청 기반 중계의 통제된 SQLite fixture 검사를 포함합니다. 실제 Dots·계정·세션에는 연결하지 않습니다.
-5. `npm run build`.
-6. `npm pack --ignore-scripts`로 패키지 생성.
-7. 원본 상태가 바뀌지 않았는지와 패키지에 허용한 파일만 포함되는지 확인.
-8. tarball, 단계별 로그, 종료 코드·시각·커밋·파일 상태·패키지 SHA256을 로컬에 보관.
+6. `npm run build`.
+7. `npm pack --ignore-scripts`로 패키지 생성.
+8. 원본 상태가 바뀌지 않았는지와 패키지에 허용한 파일만 포함되는지 확인.
+9. tarball, 단계별 로그, 종료 코드·시각·커밋·파일 상태·패키지 SHA256을 로컬에 보관.
+
+### 공개 실행 로그와 runner 개인정보
+
+2026-10-04 점검에서 Git 파일에는 없던 PC 이름·Windows 계정명·사용자 폴더
+경로가 기존 공개 Actions 로그에 포함된 것을 확인했습니다. 비밀값 마스킹은
+개인 경로를 자동으로 숨기는 보장이 아니며 첫 step 이전의 runner 정보도
+검사해야 합니다. 원래 값과 로컬 로그 백업은 공개하지 않습니다.
+
+새 self-hosted job은 저장소 변수 `KINGDOTS_RUNNER_PRIVACY_READY=true`가 있어야
+실행됩니다. 그 전에 실행 PC의 `COMPUTERNAME`, `USERNAME`, `USERPROFILE`을
+각각 저장소 암호화 Secret `KINGDOTS_RUNNER_MACHINE`, `KINGDOTS_RUNNER_USER`,
+`KINGDOTS_RUNNER_HOME`에 등록하세요. workflow가 처음부터 이 Secret을 참조하도록
+구성했습니다. 등록과 공개 로그의 영구 삭제는 소유자의 승인을 받아 수행합니다.
+실제 새 job 로그에서 원래 식별값이 없는지 확인한 뒤에만 마스킹을 검증했다고
+선언합니다. 다른 PC로 runner를 옮기면 값을 다시 확인해야 합니다.
+
+변수가 없으면 원격 job은 건너뛰며, 이를 CI 검사 통과로 보고하지 않습니다.
+로컬 `scripts/ci.ps1`은 별도로 실행할 수 있습니다. 기존 공개 로그는 소스
+커밋을 삭제하거나 바꿔도 없어지지 않습니다. 삭제는 GitHub 로그에만 적용하고
+기존 실행 결과·커밋·로컬 검증 기록은 보존합니다.
 
 검사 실패는 job 실패로 남깁니다. 검사를 이미 수행한 뒤 `prepack`을 다시 호출하지 않습니다. AI 제공자 인증과 개인 Codex 설정은 검사 환경에서 분리합니다. 실제 작업 AI를 호출하던 임시 실행기는 제거했으며 회귀 fixture는 배포 패키지에 포함하지 않습니다.
 
@@ -47,6 +68,8 @@ GitHub job의 기본 보관 위치:
 %LOCALAPPDATA%\kingdots-ci\artifacts\<commit>\<runId>-<attempt>\
   receipt.json
   install.log
+  dependency-audit.log
+  relay-dependency-audit.log
   typecheck.log
   tests.log
   build.log

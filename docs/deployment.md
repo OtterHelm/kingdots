@@ -82,6 +82,12 @@ Released/completed watches are not available to the relay.
 
 ## Package and upgrade
 
+Version 0.1.5 fixes an authentication bypass in encoded local route aliases
+confirmed in 0.1.4. Stop and replace an older running service before relying on
+its API authentication. Keep the same data directory and explicit paused state.
+The relay update bounds streamed input and patches its schema tooling dependency;
+reuse the existing private deployment/plugin with unchanged account access.
+
 npm pack validates types/tests/build. The package includes dist, web-dist,
 deployable relay sources, documentation and licenses. Fixtures, deleted prototype
 runners, plugins, local credentials and private hosting manifests are excluded.

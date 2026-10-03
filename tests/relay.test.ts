@@ -265,6 +265,41 @@ test("relay origin rejects paths, embedded credentials, HTTP and fragments", () 
   );
 });
 
+test("oversized relay responses are canceled before the whole stream is buffered", async () => {
+  const f = fixture();
+  let sent = 0,
+    canceled = false;
+  const response = new Response(
+    new ReadableStream({
+      pull(controller) {
+        if (sent++ < 200) controller.enqueue(new Uint8Array(8192).fill(32));
+        else controller.close();
+      },
+      cancel() {
+        canceled = true;
+      },
+    }),
+  );
+  const connector = new RelayConnector(
+    f.store,
+    { get: () => "fixture-secret" },
+    f.observer,
+    async () => response,
+  );
+  try {
+    await assert.rejects(connector.pollOnce(), /too large/);
+    assert.equal(canceled, true);
+    assert.ok(
+      sent < 20,
+      "Must not read the complete attacker-controlled response",
+    );
+    assert.equal(f.store.values("relay_jobs").length, 0);
+  } finally {
+    await connector.close();
+    await f.close();
+  }
+});
+
 test("legacy journal import is idempotent history, preserves source files and never enables a watch or connection", async () => {
   const root = await mkdtemp(join(tmpdir(), "kingdots-relay-"));
   const oldPath = join(root, "sites-probe-records.sqlite");

@@ -8,5 +8,13 @@
     "test": "node --test tests/relay.test.mjs",
     "db:generate": "drizzle-kit generate"
   },
-  "devDependencies": {"drizzle-orm":"0.45.2","drizzle-kit":"0.31.10"}
+  "devDependencies": {
+    "drizzle-orm": "0.45.2",
+    "drizzle-kit": "0.31.10"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
+  }
 }

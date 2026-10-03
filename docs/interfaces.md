@@ -147,6 +147,8 @@ Original sessions are not interrupted. Legacy task creation/execution returns `4
 historical task records remain readable.
 
 Local MCP uses its separate token at /mcp. GET /api/relay/reviews is UI-token-only.
+Authentication uses the route selected by Fastify, rather than the raw request
+spelling. Encoded aliases keep the same token requirement and UI/MCP role.
 GET /api/status includes relay configuration/enabled flags, connection health,
 last returned-review time, count and unknown-result count. GET /api/watches/:id
 includes correlated current-watch reviews. Imported historical reviews have no
@@ -180,7 +182,9 @@ Conflicting results and changed duplicate reviews are rejected. Request/review
 payloads expire after 15 minutes; cleanup occurs on the next relay request and
 keeps request-ID tombstones to prevent a new execution under an expired ID. HTTP
 bodies are limited to 96 × 1024 UTF-8 bytes and serialized snapshots to
-72 × 1024 UTF-8 bytes. The PC bounds
+72 × 1024 UTF-8 bytes. Request bodies are capped while reading, even without an
+accurate Content-Length. The PC caps streamed relay responses at 128 × 1024 bytes
+and cancels an oversized response before buffering the complete body. The PC bounds
 record text and explicitly marks truncation; it performs no model summarization.
 
 The main-service connector journals requests before reads in `relay_jobs`.

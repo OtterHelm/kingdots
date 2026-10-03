@@ -16,9 +16,15 @@ concurrency:
 
 jobs:
   windows:
-    if: github.ref == 'refs/heads/main'
+    # Enable only after all three identity values have been registered as secrets.
+    # A self-hosted job prints runner metadata before its first step executes.
+    if: github.ref == 'refs/heads/main' && vars.KINGDOTS_RUNNER_PRIVACY_READY == 'true'
     runs-on: [self-hosted, Windows, X64, kingdots]
     timeout-minutes: 20
+    env:
+      KINGDOTS_RUNNER_MACHINE: ${{ secrets.KINGDOTS_RUNNER_MACHINE }}
+      KINGDOTS_RUNNER_USER: ${{ secrets.KINGDOTS_RUNNER_USER }}
+      KINGDOTS_RUNNER_HOME: ${{ secrets.KINGDOTS_RUNNER_HOME }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, Node 24
         with:

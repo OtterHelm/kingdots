@@ -1,6 +1,6 @@
 {
   "name": "kingdots",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Local MCP bridge for Dots to observe existing Codex coding sessions, record scoped follow-ups, and track delivery and completion evidence. Development preview.",
   "keywords": [
     "ai-agents",

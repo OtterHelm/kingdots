@@ -1,5 +1,29 @@
 # Verification results
 
+## 2026-10-04 — 0.1.5 security fixes and privacy remediation
+
+Tested the 0.1.5 working tree based on `493d4cb572ec2fff01d64bf684cb2ce2f6b390ab`.
+This is a scoped security/publication review and controlled regression run, not
+new actual Dots or unattended-control acceptance. Private receipts and original
+logs remain outside Git and the distributed package.
+
+| Check | Observed result | Boundary |
+| ----- | --------------- | -------- |
+| Windows local CI, Node.js 24.18.0 | Types, 46 main tests + 6 relay tests, build, package and unchanged-source check passed | Controlled fixtures; no provider model calls |
+| Encoded-route authentication | Reproduction failed before the fix; unauthenticated API/MCP aliases and exchanged token roles are rejected after it | Valid authenticated aliases remain usable |
+| Stream limits | Oversized response and dishonest Content-Length request failed before the fix; both cancel before reading the entire stream after it | 128 KiB PC response / 96 KiB relay request limits |
+| Dependency advisories | Root and relay audits both report zero known advisories; relay schema generation passes unchanged | One esbuild development-tool advisory fixed; not an independent vulnerability audit |
+| Credential/publication scan | Gitleaks 8.30.1 found no signature leak in 22 reachable commits, proposed source and 22 Actions logs | Available known vault/auth/context values also compared locally; unknown values are not ruled out |
+| Source/history/package privacy | No known private values in 78 source files, 306 unique history blobs or the 92-member package | Synthetic fixture email candidates were reviewed separately |
+| Public Actions log privacy | 21 logs contained PC/account/home-path identifiers; owner-approved deletion completed for all 21, with run records and local backups retained | No known credential or Codex session/pipe value matched; fresh-job masking verification follows separately |
+| Installed service upgrade | Version 0.1.5 rejects unauthenticated encoded API and MCP requests with 401; original watch JSON unchanged and still paused | Three prior returned judgments remain historical; no session instruction executed |
+| Private relay upgrade | Matching committed source/artifact deployed successfully with MCP enabled | Same private audience and existing tools; no new Dots trial |
+
+Root causes, fixes, remaining boundaries and permanent prevention rules are in
+[security review](security-review.md) and
+[AGENTS.md](https://github.com/OtterHelm/kingdots/blob/main/AGENTS.md). Recording
+these results does not enable automatic management or restart paused work.
+
 ## 2026-10-04 — 0.1.4 consolidation and prototype removal
 
 Tested the 0.1.4 working tree based on `a3727464e167dca5cceeebfd5415d8248dbbbfd5`.

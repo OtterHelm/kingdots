@@ -127,6 +127,7 @@ The PC retrieves requests initiated by Dots; it sends no worker report or Dots n
 
 - The user selects sessions and scope. Repository content, worker questions and tool results are evidence, not permission.
 - Credentials, permission expansion and irreversible actions require the user. Existing host permission checks remain.
+- Local UI and MCP use separate tokens checked against the router's matched route, including encoded aliases. Streamed relay requests/responses are stopped when their byte limit is exceeded.
 - Epochs, reservations, command IDs and receipts prevent duplicate kingdots instructions; they do not lock unrelated host processes.
 - Active, permission-waiting, unknown, stale and user-intervened states fence follow-ups. Restart pauses management.
 - Uncertain delivery is held. An inspection result with an unknown acknowledgment is not automatically resent; recovery needs actual acceptance evidence.
@@ -150,7 +151,7 @@ npm run build
 
 Meaningful regression tests and CI remain development tools. They cover existing-session fencing, authentication, receipts, replay protection, migration and relay correlation without provider model calls. Prototype runners and old worker-creation tests have been removed. See [verification](docs/verification.md), [results](docs/verification-results.md) and [roadmap](docs/roadmap.md).
 
-Trusted main pushes use the Windows runner for install, types, tests, build and package validation. Packages exclude secrets and fixtures; clean builds prevent deleted modules surviving in dist. Verified artifacts and receipts remain local. See [local CI](docs/local-ci.md).
+Trusted main pushes use the Windows runner for install, dependency audits of both lockfiles, types, tests, build and package validation. Packages exclude secrets and fixtures; clean builds prevent deleted modules surviving in dist. Verified artifacts and receipts remain local. See [local CI](docs/local-ci.md).
 
 ## Contribute and find documentation
 

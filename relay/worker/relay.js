@@ -1,4 +1,4 @@
-const VERSION='0.1.4',RETENTION_MS=15*60_000;
+const VERSION='0.1.5',RETENTION_MS=15*60_000;
 const fail=(code,status=400)=>Object.assign(new Error(code),{status});
 const json=(value,status=200)=>Response.json(value,{status,headers:{'cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
 const query=(env,sql,...args)=>env.DB.prepare(sql).bind(...args);
@@ -8,7 +8,10 @@ const tools=[
 ];
 async function body(request){
   if(Number(request.headers.get('content-length')??0)>96*1024)throw fail('body_too_large',413);
-  const text=await request.text();if(new TextEncoder().encode(text).length>96*1024)throw fail('body_too_large',413);
+  const reader=request.body?.getReader(),chunks=[];let size=0;
+  if(reader){try{while(true){const next=await reader.read();if(next.done)break;size+=next.value.byteLength;if(size>96*1024){await reader.cancel().catch(()=>{});throw fail('body_too_large',413);}chunks.push(next.value);}}finally{reader.releaseLock();}}
+  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+  const text=new TextDecoder().decode(bytes);
   try{return JSON.parse(text||'{}');}catch{throw fail('invalid_json');}
 }
 function exact(input,keys){if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!keys.includes(k)))throw fail('invalid_arguments');}

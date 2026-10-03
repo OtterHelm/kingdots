@@ -11,6 +11,10 @@ inventory below and are not installed as local runtime dependencies; relay sourc
 Their installed packages retain their own license files and transitive notices.
 This addition does not refresh the main dependency/security audit snapshot.
 
+Version 0.1.5 overrides the schema tool's nested esbuild to 0.25.12 (MIT) to
+address GHSA-67mh-4wv8-2f99. This is development tooling, not a new model/runtime
+dependency. The locked installed packages retain their license notices.
+
 ## @anthropic-ai/claude-agent-sdk 0.3.287
 
 Declared license: SEE LICENSE IN README.md

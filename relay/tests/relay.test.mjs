@@ -15,7 +15,7 @@ async function fixture(t){
   const request=(path,{who,device=false,body,method}={})=>worker.fetch(new Request('https://fixture.invalid'+path,{method:method??(body?'POST':'GET'),headers:{...(who?{'oai-authenticated-user-id':who}:{}),...(device?{'x-kingdots-device':'fixture-device-secret'}:{}),'content-type':'application/json'},body:body?JSON.stringify(body):undefined}),env);
   const call=(name,args={},who='fixture-owner')=>request('/mcp',{who,body:{jsonrpc:'2.0',id:1,method:'tools/call',params:{name,arguments:args}}});
   const decoded=async response=>{const data=await response.json();return {error:data.error??(data.result?.isError?JSON.parse(data.result.content[0].text).error:null),value:data.result?.content?JSON.parse(data.result.content[0].text):data.result};};
-  return {db,request,call,decoded};
+  return {db,request,call,decoded,env};
 }
 test('static discovery has two bounded tools and does not bind an owner or expose records',async t=>{
   const f=await fixture(t), response=await f.request('/mcp',{body:{id:1,method:'tools/list'}});
@@ -82,4 +82,12 @@ test('concurrent different read requests reserve only one outstanding inspection
   const results=await Promise.all(pending.map(async response=>f.decoded(await response)));
   assert.equal(results.filter(r=>r.error===null).length,1);
   assert.equal(results.filter(r=>r.error==='inspection_pending_reuse_original_command_id').length,1);
+});
+
+test('oversized streamed MCP input is canceled even when content-length understates it',async t=>{
+  const f=await fixture(t);let sent=0,canceled=false;
+  const stream=new ReadableStream({pull(controller){if(sent++<200)controller.enqueue(new Uint8Array(8192).fill(32));else controller.close();},cancel(){canceled=true;}});
+  const response=await worker.fetch(new Request('https://fixture.invalid/mcp',{method:'POST',headers:{'content-length':'1'},body:stream,duplex:'half'}),f.env);
+  assert.equal(response.status,413);assert.equal(canceled,true);assert.ok(sent<16);
+  assert.equal(f.db.prepare('SELECT count(*) n FROM relay_requests').get().n,0);
 });

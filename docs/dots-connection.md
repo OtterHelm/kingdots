@@ -29,6 +29,8 @@ that Dots authored it. Actual Dots tool activity is separate acceptance evidence
 The device credential goes only to the configured trusted HTTPS origin, with
 redirects rejected. Requests carry an independent pairing token. UI/MCP tokens,
 local endpoints and raw local database files are never sent to the relay.
+The PC cancels relay responses above 128 KiB during reading. The relay cancels
+request bodies above 96 KiB even when the Content-Length header understates size.
 
 ## Requests and returned judgments
 

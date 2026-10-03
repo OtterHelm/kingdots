@@ -251,9 +251,26 @@ export class RelayConnector {
       ]),
     });
     if (!response.ok) throw new Error("Relay HTTP " + response.status);
-    const text = await response.text();
-    if (Buffer.byteLength(text) > 128 * 1024)
-      throw new Error("Relay response is too large");
+    const reader = response.body?.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    if (reader) {
+      try {
+        while (true) {
+          const next = await reader.read();
+          if (next.done) break;
+          size += next.value.byteLength;
+          if (size > 128 * 1024) {
+            await reader.cancel().catch(() => {});
+            throw new Error("Relay response is too large");
+          }
+          chunks.push(next.value);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    const text = Buffer.concat(chunks, size).toString("utf8");
     return JSON.parse(text);
   }
   private snapshot(

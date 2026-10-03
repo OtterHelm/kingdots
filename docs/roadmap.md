@@ -21,6 +21,12 @@ Historical records are retained; no paused watch is activated by migration.
 
 ## Current task boundary
 
+Version 0.1.5 fixes encoded local-route authentication bypass, bounds relay streams
+while reading, and patches the schema-tool dependency. CI audits both lockfiles.
+Remote self-hosted jobs require approved runner-identity masking configuration;
+skipped jobs are not validation passes. Historical public log cleanup and actual
+masking qualification are separate from source/package privacy scans.
+
 The 2026-10-04 maintenance scope is quality within the existing structure, without
 more providers, review scheduling or automatic control features. Finish accurate
 documentation, transport/record correlation, packaging, controlled regressions,

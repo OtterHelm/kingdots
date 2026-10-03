@@ -54,7 +54,9 @@ export function buildServer(
         return reply.code(403).send({ error: "Invalid Origin" });
       }
     }
-    const path = req.url.split("?")[0];
+    // Authenticate the route selected by the router, including encoded aliases.
+    // The raw URL can spell /api or /mcp differently while reaching that route.
+    const path = req.routeOptions.url ?? req.url.split("?")[0];
     if (path === "/healthz") return;
     if (path.startsWith("/api/") || path === "/mcp") {
       const expected =
@@ -85,7 +87,7 @@ export function buildServer(
   });
   app.get("/healthz", async () => ({ status: "ok", service: "kingdots" }));
   app.get("/api/status", async () => ({
-    version: "0.1.4",
+    version: "0.1.5",
     connectionMode: "private-relay-and-local-mcp",
     apiBilling: "forbidden",
     tunnelEnabled: false,
@@ -217,7 +219,7 @@ export function buildServer(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.4" },
+            serverInfo: { name: "kingdots", version: "0.1.5" },
             instructions:
               "Dots supervises only user-selected existing sessions. No new workers or worktrees. Observe healthy work quietly, refresh original host state before a follow-up, and reconcile unknown delivery. Host permission and management resume are user-only controls. Completion evidence is host-reported; actual unattended Dots wake-up remains unverified.",
           };
