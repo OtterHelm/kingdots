@@ -29,8 +29,8 @@ No new AI provider, schedule, worker session, judgment model, model API key or p
 model configuration was added. Regular reviews, safe live instruction delivery,
 five-minute intervention and actual overnight acceptance remain unverified.
 
-Latest local check: **2026-10-03 (Asia/Seoul)**. Historical Dots checks below were
-performed on 2026-10-02. Results describe the tested installation or working tree,
+Latest local check: **2026-10-04 (Asia/Seoul)**. Historical Dots checks below retain
+their original dates and snapshots. Results describe the tested installation or working tree,
 not universal support. Raw account, session and machine records stay in ignored
 local storage; public documentation contains no account IDs or callback secrets.
 
