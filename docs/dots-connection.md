@@ -70,6 +70,10 @@ The current source adds a separate gateway for an OAuth-capable ChatGPT connecto
 Actual registration, activation, connector compatibility and Dots tool exposure
 remain unverified. These steps describe the implemented contract; they do not
 imply every account exposes a compatible setup screen.
+Read-only inspection of the tested account found Plugins → Add → Create custom
+MCP server, with Server URL and OAuth fields. Opening that form did not create a
+connection. Local Codex plugin installation remains separate from this account
+connection.
 
 1. Start the local service with genuine app context. Register the existing local
    Codex session as `backend: codex-app`, `source: app_host` with its original goal,
@@ -95,6 +99,15 @@ imply every account exposes a compatible setup screen.
 6. Verify actual Dots calls `watch_list`, `watch_get` and `watch_host_read` for the
    selected watch. Verify unrelated watches and local APIs are inaccessible.
    Same-session sending needs its own user-authorized real host test.
+
+For the first read/decision-return gate, keep the selected watch paused. Ask actual
+Dots to read it and acknowledge one existing attention event with a correlated
+no-action decision. Verify the durable callback separately from its visible reply.
+The current `decision_ack` requires `kingdots:manage`, so local consent must make
+that permission explicit even for this no-action test. Do not resume management,
+send a coding instruction or approve other watches during this gate. Retaining
+the paused state must be checked before and after the trial. Only after a real
+callback passes should the separately authorized same-session send be attempted.
 
 Scopes are `kingdots:read` and optional `kingdots:manage`. The gateway exposes
 12 selected-watch tools out of 18 local tools. One active gateway management

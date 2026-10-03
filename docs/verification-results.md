@@ -31,9 +31,10 @@ still enforced.
 The affected app-host/watch/event suites passed **22/22 tests**, and typecheck
 passed. The full local suite passed **57/57 tests** and the build passed before
 the user-requested pause. These are controlled regressions, not actual Dots callback acceptance.
-Full local CI and the installed 0.1.3 plugin check are pending. Regular 15-minute
-content reviews, configurable intervals, active steering, automatic recovery and
-overnight management remain unimplemented behind the failed connection gate.
+The subsequent Windows local CI and installed-plugin check are recorded below.
+Regular 15-minute content reviews, configurable intervals, active steering,
+automatic recovery and overnight management remain unimplemented behind the
+failed connection gate.
 
 The local service was started with genuine app context and its existing watch
 kept paused. No model API key, paid API, public tunnel or account connector was
@@ -71,9 +72,35 @@ delivery is held without retry. A sent attention message cannot be atomically
 recalled or reserve the target, so this is a bounded experiment, not production
 intervention safety. Its result is recorded below.
 
-The local plugin remains 0.1.2. This diagnostic has not added a supported service
-command, exposed an endpoint or passed overnight acceptance. Private identities,
+The local plugin was 0.1.2 during that diagnostic. It did not add a supported service
+command, expose an endpoint or pass overnight acceptance. Private identities,
 messages and receipts remain in ignored local storage.
+
+### Resumed Windows CI and installed plugin: 0.1.3
+
+The trusted Windows local runner passed
+[run 37104580129](https://github.com/OtterHelm/kingdots/actions/runs/37104580129)
+against clean commit `e1a748b`: dependency installation, typecheck, **57/57 tests**,
+build and package all exited successfully. The local receipt records an unchanged
+source fingerprint and retains the package locally; it contains no uploaded
+private logs or test data.
+
+Installation then found the compatibility `.codex-plugin/plugin.json` still
+declared 0.1.2 while the portable manifest declared 0.1.3. The working tree corrected
+that metadata and refreshed the existing local plugin. An official MCP SDK client
+connected using the installed 0.1.3 stdio configuration, checked both manifest
+versions and the running service version, and discovered **18 tools**. Its explicit
+`watch_host_read` returned the enrolled original local Codex conversation in
+`running` state. The paused watch, epoch, observations, events and commands were
+unchanged; `observationStored` was false and coding-session commands remained zero.
+This was a local-program check, not an actual Dots tool call or callback.
+
+Read-only browser inspection also confirmed a custom MCP creation form in the
+tested ChatGPT account, offering a server URL and OAuth authentication. No form
+was submitted, public origin configured, OAuth grant approved or connector created.
+The previously rejected public tunnel launch was not retried. The gateway remains
+unconfigured, and real account OAuth compatibility and Dots tool exposure are
+still unverified. No model API key or paid model API was used.
 
 ### Finite post-response trial result: 0.1.2
 

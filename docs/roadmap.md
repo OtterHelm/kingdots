@@ -43,8 +43,9 @@ targets five minutes, and safe same-conversation resumption is allowed after
 confirmed owner exit. The five requested products remain the eventual support
 goal; their independent capabilities are not promised before actual trials.
 
-1. Verify authorized same-session sends and host context after the caller ends, then
-   actual Dots discovery/linking through a supported local or external OAuth route.
+1. Verify actual Dots reads and durable no-action decision return through a supported
+   local or external OAuth route, then authorized same-session sends and host context
+   after the caller ends.
    Keep package/plugin/protocol versions aligned for release. Establish the host
    ownership boundary; idle preflight is not an atomic host reservation.
 2. Verify a supported event or Dots check-in that wakes the actual dot after its
@@ -53,8 +54,8 @@ goal; their independent capabilities are not promised before actual trials.
    observation, scoped question, error/stop, same-session follow-up, fresh test/artifact
    evidence and final user report. Verify pause/intervention/uncertain delivery.
 
-The current local suite passes 55 tests. Before release, provide a verified
-recovery path for unknown app-host delivery. Manual
+The local CI and installed-plugin results are in [verification results](verification-results.md).
+Before release, provide a verified recovery path for unknown app-host delivery. Manual
 app-host receipts are deliberately not accepted by the public tools.
 
 Until all three pass, overnight supervision remains unverified. Local MCP discovery,

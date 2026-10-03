@@ -90,6 +90,10 @@ cross-user credential backup.
 The installed plugin contains absolute Node, CLI and data-directory paths. Moving
 the checkout or changing Node/package/data locations requires `install-plugin`
 again. Local MCP and the service must point to the same data directory.
+Verify that the installed portable `plugin.json` and compatibility
+`.codex-plugin/plugin.json` both match the package version. Test tool discovery
+through the installed stdio configuration; a successful install command does not
+establish that actual Dots can access those tools.
 
 ## Package installation
 
