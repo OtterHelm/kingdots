@@ -110,6 +110,34 @@ test("app-host sends once to the original idle session and retains verified rece
   }
 });
 
+test("explicit reads of paused or released watches do not reactivate or change management records", async () => {
+  for (const release of [false, true]) {
+    const f = await setup();
+    try {
+      f.observer.pause(f.watch.id, release);
+      const before = f.store.getWatch(f.watch.id);
+      const eventsBefore = f.store.events().length;
+      f.set({ state: "running", signature: "new-state" });
+      const result = await f.observer.readHost(f.watch.id, "existing");
+      assert.equal(result.snapshot.state, "running");
+      assert.equal(
+        "observationStored" in result && result.observationStored,
+        false,
+      );
+      assert.deepEqual(f.store.getWatch(f.watch.id), before);
+      assert.equal(f.store.events().length, eventsBefore);
+      assert.equal(f.sends(), 0);
+      assert.equal(f.store.tasks().length, 0);
+      await assert.rejects(
+        f.observer.readHost(f.watch.id, "another-session"),
+        /not selected by the user/,
+      );
+    } finally {
+      await f.cleanup();
+    }
+  }
+});
+
 test("pause during transport startup prevents native dispatch and releases proven-unsent work", async (t) => {
   const f = await setup();
   try {

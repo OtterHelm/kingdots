@@ -71,7 +71,7 @@ export function tools(
     {
       name: "watch_host_read",
       description:
-        "Read the enrolled existing local Codex app conversation through the installed official app tools. No AI session is started. A changed external user message yields automatic management.",
+        "Read the enrolled existing local Codex app conversation through the installed official app tools. Paused/released watches return a snapshot without resuming management or storing an observation. During active management, changed external user input yields control. No AI session is started.",
       schema: z.object({ watchId, sessionId: z.string().min(1) }),
       readOnly: false,
       run: (input) => observer.readHost(input.watchId, input.sessionId),

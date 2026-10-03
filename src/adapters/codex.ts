@@ -106,7 +106,7 @@ export class CodexAdapter implements Adapter {
       child.once("error", disconnect);
       child.once("close", disconnect);
       await this.rpc("initialize", {
-        clientInfo: { name: "kingdots", title: "kingdots", version: "0.1.2" },
+        clientInfo: { name: "kingdots", title: "kingdots", version: "0.1.3" },
         capabilities: { experimentalApi: false },
       });
       child.stdin!.write(JSON.stringify({ method: "initialized" }) + "\n");

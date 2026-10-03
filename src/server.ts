@@ -85,7 +85,7 @@ export function buildServer(
   });
   app.get("/healthz", async () => ({ status: "ok", service: "kingdots" }));
   app.get("/api/status", async () => ({
-    version: "0.1.2",
+    version: "0.1.3",
     connectionMode: "local-stdio",
     apiBilling: "forbidden",
     tunnelEnabled: false,
@@ -259,7 +259,7 @@ export function buildServer(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.2" },
+            serverInfo: { name: "kingdots", version: "0.1.3" },
             instructions:
               "Dots supervises only user-selected existing sessions. No new workers or worktrees. Observe healthy work quietly, refresh original host state before a follow-up, and reconcile unknown delivery. Host permission and management resume are user-only controls. Completion evidence is host-reported; actual unattended Dots wake-up remains unverified.",
           };

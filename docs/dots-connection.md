@@ -30,6 +30,18 @@ See [deployment](deployment.md) for environment, ports and restart procedures.
 
 ## Experimental existing-app attention path
 
+The current connection-gate check found no kingdots read/decision tools in actual
+Dots. Version 0.1.3 repairs the local callback's watch lookup and permits explicit
+reads of paused watches without enabling management. These changes prepare the
+existing MCP path; they do not expose it to Dots or pass the connection gate.
+
+The smallest external alternative remains forwarding only the isolated OAuth
+gateway over an authenticated HTTPS MCP connection. Records and host control stay
+on the PC. Limit an initial grant to the selected existing watch; verify a live
+read and decision callback before follow-up delivery. The dashboard and local API
+must stay private. An account connector is not created by installing the local
+Codex plugin. See [dated results](verification-results.md) for the actual trial.
+
 A bounded diagnostic using the installed official app-tool relay delivered
 read-only attention messages to an already-existing actual Dots conversation.
 Both replies appeared in its normal conversation. This does not require an

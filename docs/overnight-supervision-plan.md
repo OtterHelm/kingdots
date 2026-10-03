@@ -17,16 +17,20 @@ records without a model call. Dots judges when intervention is needed and guides
 the original sessions. A dashboard and information delivery are intermediate
 milestones, not acceptance of the user's proactive supervision requirement.
 
-| Decision             | Agreed scope                                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Current test target  | Existing Windows Codex app conversation                                                                                                                |
-| Full support goal    | Codex app, Codex CLI, Claude Code, Claude app and OpenCode CLI; qualify each feature separately                                                        |
-| Session continuity   | Keep the original conversation ID and project; safe resumption after the original process demonstrably ends is permitted                               |
-| Concurrent ownership | Never resume the same conversation in a second process while its original owner may still be running                                                   |
-| Response objective   | Dots should intervene within five minutes of an ordinary question or recoverable failure; measure actual latency before claiming this objective is met |
-| Usage                | No paid model API or new API key; existing Dots/coding-product allowances still apply and are not assumed to be unlimited or zero                      |
-| Approval             | Original scoped guidance needs no repeated approval; credentials, elevated permissions and irreversible actions remain user decisions                  |
-| Existing work        | Preserve the original folders, branches, changes and working sessions; no replacement conversations or supervisor worker                               |
+| Decision              | Agreed scope                                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Current test target   | Existing Windows Codex app conversation                                                                                                                |
+| Full support goal     | Codex app, Codex CLI, Claude Code, Claude app and OpenCode CLI; qualify each feature separately                                                        |
+| Session continuity    | Keep the original conversation ID and project; safe resumption after the original process demonstrably ends is permitted                               |
+| Concurrent ownership  | Never resume the same conversation in a second process while its original owner may still be running                                                   |
+| Response objective    | Dots should intervene within five minutes of an ordinary question or recoverable failure; measure actual latency before claiming this objective is met |
+| Normal content review | First review on enrollment, then every 15 minutes by default; configurable per watch with a one-minute minimum, including during running work          |
+| Running intervention  | Safe additional instructions only for independently verified host capabilities; otherwise wait until the current response ends                         |
+| Unexpected recovery   | Reconcile the original session, ownership, user intervention and uncertain commands before automatic continuation; explicit human pauses remain paused |
+| Connection preference | Collect, store and control locally; assess a minimal authenticated MCP relay only after the official local round trip is shown unavailable             |
+| Usage                 | No paid model API or new API key; existing Dots/coding-product allowances still apply and are not assumed to be unlimited or zero                      |
+| Approval              | Original scoped guidance needs no repeated approval; credentials, elevated permissions and irreversible actions remain user decisions                  |
+| Existing work         | Preserve the original folders, branches, changes and working sessions; no replacement conversations or supervisor worker                               |
 
 The five-minute objective applies to detecting the need and delivering appropriate
 guidance, not to finishing every repair in five minutes. A permission request can
@@ -187,6 +191,32 @@ and [desktop guide](https://code.claude.com/docs/en/desktop) describe separate
 interfaces; installed-version and real ownership tests remain necessary.
 
 ## Completion of this plan
+
+### Approved implementation order and current gate
+
+The approved implementation starts with one existing Windows Codex app session
+and actual Dots. It must establish read access, a program-readable no-action
+decision, one same-session marker round trip and post-response continuation
+before adding the normal-review scheduler or broadening the dashboard/providers.
+
+The latest actual Dots discovery returned no kingdots read/decision tools and no
+local-specific existing-session read tool. The earlier cloud-send trial was
+declined for lack of a fresh verifiable target state. Version 0.1.3 repairs local
+watch-event acknowledgments and allows explicit paused-watch reads. Those are
+connection prerequisites, not a completed automatic supervisor.
+
+After the gate passes, implement `reviewIntervalMs`, one outstanding review per
+watch, durable review IDs/epochs/observation references, structured decision
+recording and due/late timestamps. Normal running work also requests Dots review;
+worker-authored summaries are never required. Expand host content access as needed
+with explicit truncation and source references. Add verified active follow-up
+capabilities, fresh command/exit/log/artifact completion checks and recovery
+reconciliation next. Then run real unattended acceptance and qualify other products.
+
+An external fallback uses only the isolated OAuth MCP gateway and selected-watch
+consent. Confirm destination, access, cost and deployment before linking it.
+Do not expose the dashboard, create model API keys, substitute another AI, or
+repeat a policy-rejected tunnel launch through another execution path.
 
 The user's actual request succeeds only when actual Dots, after its initial
 response ends and without further user messages, manages the selected existing

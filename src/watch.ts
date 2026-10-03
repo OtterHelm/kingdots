@@ -572,7 +572,7 @@ export class Observer {
   }
   async readHost(watchId: string, sessionId: string) {
     const before = this.store.getWatch(watchId);
-    this.writable(before, before.epoch);
+    if (before.automatic) this.writable(before, before.epoch);
     const target = this.target(before, "codex-app", sessionId);
     if (target.source !== "app_host" || !this.appHost)
       throw new DomainError(
@@ -580,6 +580,12 @@ export class Observer {
         "Select the app_host transport for this existing Codex session",
       );
     const snapshot = await this.appHost.read(sessionId, target.project);
+    if (!before.automatic)
+      return {
+        watch: this.store.getWatch(watchId),
+        snapshot,
+        observationStored: false,
+      };
     return this.recordHost(watchId, snapshot, before.epoch);
   }
   private recordHost(watchId: string, snapshot: HostSnapshot, epoch: number) {

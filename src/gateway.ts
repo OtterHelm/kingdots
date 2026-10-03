@@ -190,7 +190,7 @@ export function buildGateway(
           result = {
             protocolVersion: "2025-11-25",
             capabilities: { tools: {} },
-            serverInfo: { name: "kingdots", version: "0.1.2" },
+            serverInfo: { name: "kingdots", version: "0.1.3" },
             instructions:
               "Dots decides. Use only locally consented existing watches. Read host state, prepare and send through the local bridge; no new sessions or permission approvals. Unknown sends are never retried. Actual unattended acceptance remains unverified.",
           };

@@ -10,6 +10,14 @@ attention events, scoped decisions and host delivery receipts. It supplies no se
 supervisor model. Never create a new session, worktree, worker, API key or paid API
 fallback to complete this workflow. Do not take over unrelated sessions.
 
+The user requires Dots to inspect selected sessions proactively, including healthy
+running work. Never ask coding AIs to compose status reports or initiate supervision.
+The agreed normal content-review interval is 15 minutes, user-configurable, with
+urgent questions/errors targeting intervention within five minutes. The service's
+periodic review scheduler and automatic recovery are not implemented until the
+actual read/decision-return/follow-up connection gate passes. Do not claim that
+attention-only notifications implement that requirement.
+
 1. Get the user's existing session IDs, projects, original goals, completion
    conditions and permitted follow-ups. Use available official host session tools
    to identify/read the exact sessions. Call `watch_create` to enroll those sessions,
@@ -18,6 +26,8 @@ fallback to complete this workflow. Do not take over unrelated sessions.
    For the installed local Codex app bridge, enroll `backend: codex-app` and
    `source: app_host`. Use `watch_host_read` to read that exact enrolled target.
    The local relay uses real executor context; it is not a separate AI session.
+   An explicit paused/released watch read returns current content without storing
+   observations or enabling management; never use it as permission to send.
 2. Verify Dots's actual host tools and supported event/scheduled check-in path.
    If unavailable, explain that this watch is registered but overnight supervision
    cannot run yet. Do not claim a normal Codex chat, local MCP discovery or webhook

@@ -5,7 +5,7 @@ import ipaddr from "ipaddr.js";
 import { Webhook } from "standardwebhooks";
 import { z } from "zod";
 import { Store } from "./store.js";
-import { DomainError, type EventRecord } from "./domain.js";
+import { DomainError, type EventRecord, type Task } from "./domain.js";
 import type { SecretStore } from "./vault.js";
 
 const subscribeSchema = z.object({
@@ -399,19 +399,29 @@ export class Events {
       .get(eventId) as { body: string } | undefined;
     if (!row) throw new DomainError("not_found", "Event not found", 404);
     const event = JSON.parse(row.body) as EventRecord;
-    const task = this.store.getTask(event.taskId);
-    task.lastDecisionAt = new Date().toISOString();
-    this.store.saveTask(task);
-    const connection = this.store.get<any>("settings", "dots_connection") ?? {};
-    connection.lastDotsDecisionAt = task.lastDecisionAt;
-    this.store.put("settings", "dots_connection", connection);
-    this.store.put("settings", "decision:" + eventId, {
-      decision,
-      at: task.lastDecisionAt,
+    let legacyTask: Task | undefined;
+    try {
+      this.store.getWatch(event.taskId);
+    } catch (error) {
+      if (!(error instanceof DomainError) || error.code !== "not_found")
+        throw error;
+      legacyTask = this.store.getTask(event.taskId);
+    }
+    const at = new Date().toISOString();
+    this.store.transaction(() => {
+      if (legacyTask) {
+        legacyTask.lastDecisionAt = at;
+        this.store.saveTask(legacyTask);
+      }
+      const connection =
+        this.store.get<any>("settings", "dots_connection") ?? {};
+      connection.lastDotsDecisionAt = at;
+      this.store.put("settings", "dots_connection", connection);
+      this.store.put("settings", "decision:" + eventId, { decision, at });
     });
     return {
       acknowledged: true,
-      taskId: task.id,
+      taskId: event.taskId,
       unattendedAcceptance: "unverified",
       note: "An MCP decision acknowledgment does not prove that the original response ended or that the final report reached the user.",
     };

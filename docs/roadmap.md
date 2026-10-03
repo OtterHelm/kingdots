@@ -14,6 +14,12 @@ Controlled fixtures cover those additions. One actual installed-host read of the
 selected local conversation passed on Windows, with active-session sending blocked.
 Actual Dots compatibility and live idle-session sending remain unverified.
 
+Version 0.1.3 fixes watch-event decision acknowledgments and permits explicit
+paused/released app-host reads without changing management. The latest real Dots
+discovery still lacks kingdots read/decision tools. These are prerequisite fixes;
+the approved 15-minute configurable proactive review loop and safe automatic
+recovery are gated on that connection and are not implemented yet.
+
 Bounded native app messages now have actual Dots receipt and user-facing reply
 evidence. The read/wait return path omits those replies. The next connectivity
 trial is Dots's own existing-task follow-up tool against the selected local Codex

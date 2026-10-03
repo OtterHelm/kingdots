@@ -170,6 +170,44 @@ test("watch attention subscriptions retain signed event delivery without declari
     await f.cleanup();
   }
 });
+
+test("decision acknowledgment resolves an existing-session watch without a legacy worker and preserves its control state", async () => {
+  const f = await setup();
+  try {
+    const watch = f.observer.create(f.input);
+    observe(f, watch, "question");
+    const event = f.store
+      .events()
+      .filter((e) => e.taskId === watch.id)
+      .at(-1)!;
+    const before = f.store.getWatch(watch.id);
+    const events = new Events(f.store, {
+      get: () => undefined,
+      set: async () => {},
+    });
+    assert.equal(f.store.tasks().length, 0);
+    const result = events.acknowledge(
+      event.id,
+      "Continue observation; no instruction required",
+    );
+    assert.equal(result.acknowledged, true);
+    assert.equal(result.taskId, watch.id);
+    assert.equal(result.unattendedAcceptance, "unverified");
+    assert.equal(
+      f.store.get<any>("settings", "decision:" + event.id)?.decision,
+      "Continue observation; no instruction required",
+    );
+    assert.deepEqual(f.store.getWatch(watch.id), before);
+    assert.equal(f.store.tasks().length, 0);
+    assert.equal(f.store.commands(watch.id).length, 0);
+    assert.throws(
+      () => events.acknowledge("nonexistent-event", "wait"),
+      /Event not found/,
+    );
+  } finally {
+    await f.cleanup();
+  }
+});
 test("healthy observations stay quiet, questions request Dots once, and old observation replays cannot replace fresh state", async () => {
   const f = await setup();
   try {

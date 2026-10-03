@@ -7,21 +7,14 @@ English | [Korean](docs/README.ko.md)
 
 **A local MCP bridge and durable record of Dots supervising your existing AI coding sessions.**
 
-Before sleeping, select the sessions that are already working and tell Dots their
-goals and permitted follow-ups. Healthy sessions continue undisturbed. When a
-session asks a question, reports an error, stops responding or finishes a turn,
-Dots reviews its context and decides whether to answer, guide the same session,
-wait for the user, or report completion.
+kingdots is designed for handing already-running coding work to Dots, including
+while you are asleep. You select the existing sessions, their goals and permitted
+follow-ups. Dots reviews context, guides the same sessions and reports outcomes;
+kingdots supplies observations, attention events and delivery records.
 
 **Dots is the supervisor.** kingdots stores observations, requests attention and
 records decisions and delivery results. It has no judgment model and does not
 create new AI sessions or worktrees as part of this workflow.
-
-> **Development preview.** Existing-session watches, the dashboard, local MCP,
-> a Codex app host bridge and an OAuth gateway are implemented. Actual Dots
-> connection and supervision after its initial response ends remain unverified.
-> Installation or a saved watch does not establish unattended supervision.
-> See [dated verification results](docs/verification-results.md) for tested scope.
 
 ## Design intent
 
@@ -33,8 +26,9 @@ record of what needs attention and what was actually delivered.
   separate supervisor model. Dots and the coding sessions use their product allowances.
 - **Continue the selected work.** Keep the existing sessions, projects, branches
   and worktrees; the public workflow does not launch replacement sessions.
-- **Leave healthy work running.** Unchanged healthy state stays quiet. Questions,
-  failures, idle responses, unavailable connections and stale state request review.
+- **Inspect ongoing work proactively.** Dots should assess existing session activity
+  without asking coding AIs for status reports. Healthy execution continues while
+  its direction is reviewed; questions, errors and stopped responses need earlier attention.
 - **Record before sending.** Retain the exact prompt, reason, observation, ownership
   epoch and command ID. An uncertain send stays locked rather than being blindly retried.
 - **Completion needs evidence.** Idle alone is insufficient. Dots inspects fresh
@@ -67,7 +61,7 @@ flowchart LR
     D <-->|Local stdio or OAuth MCP| K[kingdots local service]
     K <-->|Installed official app tools| S[Existing local Codex sessions]
     K --> E[Durable attention events]
-    E -. Actual Dots wake-up unverified .-> D
+    E -. Attention notification .-> D
     K <--> DB[(SQLite records)]
     W[Local dashboard] <--> K
 ```
@@ -91,6 +85,10 @@ does not send it on either path.
 
 App-host writes require the existing ChatGPT login and standard provider context;
 API-key, custom-provider and unknown authentication contexts are blocked.
+
+Explicit reads of paused or released watches return current host content without
+resuming management or changing observation records. Decision acknowledgments
+support existing-session watch events without creating a legacy worker.
 
 An `adapter` target can be read by an installed provider adapter. Stored CLI history
 does not prove that an external process is idle or that kingdots owns it, so such
@@ -160,8 +158,10 @@ otherwise they are selected automatically.
 Example request to actual Dots:
 
 > While I sleep, supervise these existing Codex sessions: [session IDs and projects].
+> Review their existing activity every 15 minutes without asking the coding AIs
+> to write status reports.
 > Keep their original goals. Answer routine questions and guide repairs within the
-> existing scope. Leave healthy work alone. Do not create sessions, change permissions,
+> existing scope. Leave healthy work executing. Do not create sessions, change permissions,
 > commit, push or deploy. Review test/artifact evidence and report the outcome.
 
 Start the coding session normally, identify its existing ID/project, and register
@@ -204,34 +204,26 @@ For `app_host`, use `watch_host_read` → `watch_instruction_prepare` →
 Manual claim/receipt tools belong to the `dots_host` path. The
 [interface contract](docs/interfaces.md) describes both sequences.
 
-## Plugin and connection status
+## Plugin and Dots connection
 
 The plugin contains a management skill and 18 local MCP tools. The OAuth gateway
 exposes a restricted subset scoped to existing watches approved on the PC.
 See the [interface contract](docs/interfaces.md).
-It uses local stdio without a Platform API key. Reload supported plugin connections
-and confirm that actual Dots can use both kingdots and the official host session tools.
-Ordinary Codex plugin discovery does not establish actual Dots access.
+The plugin uses local stdio without a Platform API key. `install-plugin` installs
+into Codex's local environment; account connector setup is a separate step.
+Use the [connection guide](docs/dots-connection.md) for host prerequisites,
+local plugin setup and the OAuth route.
 
-`install-plugin` installs into Codex's local environment. It does not register an
-account connector for actual Dots. The new OAuth gateway is an experimental
-connection route with local consent, not proof of successful Dots linking.
-Earlier Dots probes did not expose kingdots or read the selected local conversation;
-the new bridge/gateway needs its own real acceptance evidence. See the
-[dated results](docs/verification-results.md) and [connection guide](docs/dots-connection.md).
+The current focus is existing Codex sessions: an app host bridge and CLI metadata
+reads. Dots account linking and unattended supervision are experimental, as are
+the Claude and OpenCode adapters. Regular content review (planned default: 15
+minutes, configurable) and automatic recovery remain gated on the actual Dots
+round trip. Detailed compatibility and test evidence live
+in [verification results](docs/verification-results.md).
 
-The minimal release focuses on existing Codex sessions. Codex CLI metadata reads
-are available. The app bridge is implemented and covered by controlled fixtures;
-one actual local Codex app read passed on Windows and active-session follow-ups
-were blocked. Live sending and actual Dots compatibility still require acceptance.
-Claude and OpenCode
-adapters remain experimental.
-
-Supported events or a supported Dots check-in must actually wake Dots after its
-initial response ends. The existing signed event outbox uses `task.attention_required`
-and `task.completed`, with `taskId` holding the watch ID for compatibility.
-Webhook receipt and `decision_ack` are separate from successful unattended management.
-See [Dots connection and acceptance](docs/dots-connection.md).
+The signed event outbox uses `task.attention_required` and `task.completed`, with
+`taskId` holding the watch ID for compatibility. See the
+[interface contract](docs/interfaces.md) for subscriptions and decision records.
 
 ## Safety, privacy and usage
 
@@ -273,20 +265,15 @@ npm test
 npm run build
 ```
 
-Controlled tests cover existing-session registration without worker creation, attention
-deduplication, stale observations, same-session reservations, lost delivery, intervention,
-restart and evidence coverage. They make no provider model calls and do not pass actual
-Dots unattended acceptance. Earlier worker experiments remain internal test fixtures
-and read-only historical records; their creation/execution endpoints are disabled.
+Controlled tests cover registration, attention deduplication, stale observations,
+session reservations, delivery, intervention, restart and evidence coverage.
+They use fixtures without provider model calls. Test procedures, results and
+release criteria are in [verification](docs/verification.md),
+[verification results](docs/verification-results.md) and [roadmap](docs/roadmap.md).
 
 Trusted `main` pushes use the local Windows runner for install, types, tests, build
 and package validation. Verified packages and receipts remain local. See [local CI](docs/local-ci.md)
 (Korean), [verification](docs/verification.md) and [the minimal roadmap](docs/roadmap.md).
-
-The release gate is: **actual Dots observes an already-working session after the
-initial response ends, handles a scoped question/error in that same session, inspects
-fresh evidence and reports the result without another user message or a new session.**
-This gate remains unverified.
 
 ## Contribute and find documentation
 

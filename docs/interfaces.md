@@ -79,7 +79,10 @@ and restarts. Reservations coordinate kingdots clients, not unrelated host proce
 ### App-host delivery
 
 1. `watch_host_read({watchId, sessionId})` validates local Codex session/project
-   identity and records the snapshot. It also returns recent turns for Dots to inspect.
+   identity and records the snapshot during active management. It also returns
+   recent turns for Dots to inspect. An explicit read of a paused or released
+   watch returns the snapshot with `observationStored: false` without changing
+   management, observations, events, reservations or commands.
 2. `watch_instruction_prepare` records the exact prompt and current observation,
    epoch and host signature. It reserves the selected session within kingdots.
 3. `watch_instruction_send({watchId, commandId, epoch})` reads the host again.
@@ -94,6 +97,12 @@ real executor app context. No caller-supplied observation or manual receipt may
 impersonate the app-host transport. New external user input detected against a
 prior snapshot pauses management; recognized kingdots delegation does not.
 The read/send sequence is not an atomic host reservation.
+
+`decision_ack` resolves the event's `taskId` as an existing-session watch first,
+then as a legacy task for backward compatibility. Its decision and timestamp are
+stored atomically. A watch acknowledgment does not create a worker, alter the
+watch's control state or establish an actual Dots connection. The generic
+acknowledgment is not a completed periodic content review.
 
 Before sending, the bridge checks existing ChatGPT authentication and standard
 provider configuration. API-key, custom-provider and unknown contexts are blocked.

@@ -7,6 +7,38 @@ local storage; public documentation contains no account IDs or callback secrets.
 
 ## Actual Dots message probe: 2026-10-03
 
+### Implementation connection gate and local fixes: 0.1.3 working tree
+
+The real existing Dot answered the new bounded connection probe in its normal
+conversation. It reported no exposed kingdots `watch_get`/`decision_ack` tools
+and no local-specific existing-Codex read tool. It performed no callback, session
+instruction, new-task creation or account change. The earlier failed cloud read
+was not retried without a new target-mapping basis. Its user-facing JSON is not
+an automated local decision receipt.
+
+The earlier post-response follow-up report was also inspected. Dots explicitly
+declined to send: it could not verify the target's fresh idle state or user
+intervention, and its cloud send schema had no expected-turn/idle condition.
+That trial was not an attempted host-write failure.
+
+Inspection found a separate local bug: `decision_ack` looked up watch events only
+in the legacy tasks table. Version 0.1.3 resolves watches first, preserves legacy
+task compatibility and atomically saves the acknowledgment without changing
+watch management. Explicit app-host reads now return a paused/released watch's
+snapshot without resuming it or recording an observation. Target enrollment is
+still enforced.
+
+The affected app-host/watch/event suites passed **22/22 tests**, and typecheck
+passed. The full local suite passed **57/57 tests** and the build passed before
+the user-requested pause. These are controlled regressions, not actual Dots callback acceptance.
+Full local CI and the installed 0.1.3 plugin check are pending. Regular 15-minute
+content reviews, configurable intervals, active steering, automatic recovery and
+overnight management remain unimplemented behind the failed connection gate.
+
+The local service was started with genuine app context and its existing watch
+kept paused. No model API key, paid API, public tunnel or account connector was
+created. Private probe IDs and raw conversation content remain ignored locally.
+
 The installed `codex-app-tools` **0.1.5** relay, called by an ordinary Node process
 with the genuine local executor context, accepted two bounded messages to the
 already-existing actual Dots conversation. The first requested a read-only ready

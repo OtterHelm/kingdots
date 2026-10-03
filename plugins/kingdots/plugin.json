@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "kingdots",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Let Dots observe and supervise user-selected existing coding sessions without creating workers",
   "license": "Apache-2.0",
   "repository": "https://github.com/OtterHelm/kingdots",

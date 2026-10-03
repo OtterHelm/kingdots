@@ -73,6 +73,13 @@ node dist/cli.js start
 node dist/cli.js status
 ```
 
+Version 0.1.3 retains explicit app-host reads while a watch is paused or released.
+These return current host content without restarting management or updating its
+records. Event decision acknowledgments accept watch IDs without requiring a
+legacy worker. The local plugin still does not register an account-level Dots
+connection. The proactive review scheduler and automatic recovery remain gated
+on the real connection trial in the [validation plan](overnight-supervision-plan.md).
+
 Records include `kingdots.sqlite`, `secrets.bin`, `instance.json`, `service.lock`,
 `service.log` and the generated local plugin marketplace. SQLite stores watches,
 observations, commands and hashed OAuth token records. Windows DPAPI protects local
